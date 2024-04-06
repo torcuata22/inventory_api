@@ -1,27 +1,35 @@
-# frozen_string_literal: true
-
 class Users::SessionsController < Devise::SessionsController
+  respond_to :json
   # before_action :configure_sign_in_params, only: [:create]
 
-  # GET /resource/sign_in
-  # def new
-  #   super
-  # end
+  def new
+    puts "Params received: #{params.inspect}"
+    user = User.find_by(email: params[:user][:email])
 
-  # POST /resource/sign_in
-  # def create
-  #   super
-  # end
+    if user && user.valid_password?(params[:user][:password])
+      sign_in user
+      render json: {
+        user: user.as_json(only: [:name, :avatar]),
+        token: user.authentication_token
+      }, status: :ok
 
-  # DELETE /resource/sign_out
-  # def destroy
-  #   super
-  # end
+    else
+      puts "User not found or invalid password"
+      render json: { error: 'Invalid email or password' }, status: :unprocessable_entity
+    end
+  end
 
-  # protected
+  def destroy
+    if current_user
+      sign_out current_user
+      render json: {message: 'User logged out successfulle'}, status: :ok
+    else
+      render json: {message: 'No user logged in'}, status: :unprocessable_entity
+    end
+  end
+  private
 
-  # If you have extra params to permit, append them to the sanitizer.
-  # def configure_sign_in_params
-  #   devise_parameter_sanitizer.permit(:sign_in, keys: [:attribute])
-  # end
+  def session_params
+    params.permit(:email, :password)
+  end
 end
