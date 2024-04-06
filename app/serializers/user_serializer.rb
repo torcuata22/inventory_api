@@ -3,7 +3,7 @@ class UserSerializer
   attributes :id, :email, :name, :avatar
 
   attribute :avatar_url do |object|
-    object.avatar.url
+    object.avatar
   end
 end
 
