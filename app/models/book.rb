@@ -4,4 +4,5 @@ class Book < ApplicationRecord
   validates :isbn, presence: true, uniqueness: true, length: { maximum: 20 }
   validates :description, presence: true, length: { maximum: 500 }
   validates :publication_details, presence: true
+  belongs_to :store
 end
