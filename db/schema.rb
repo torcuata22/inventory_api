@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_10_015345) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_12_013318) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -25,6 +25,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_10_015345) do
     t.string "publication_details"
     t.bigint "store_id", null: false
     t.index ["store_id"], name: "index_books_on_store_id"
+  end
+
+  create_table "books_stores", id: false, force: :cascade do |t|
+    t.bigint "book_id", null: false
+    t.bigint "store_id", null: false
+    t.index ["book_id", "store_id"], name: "index_books_stores_on_book_id_and_store_id"
+    t.index ["store_id", "book_id"], name: "index_books_stores_on_store_id_and_book_id"
   end
 
   create_table "stores", force: :cascade do |t|
