@@ -27,6 +27,7 @@ class Users::SessionsController < Devise::SessionsController
       render json: {message: 'No user logged in'}, status: :unprocessable_entity
     end
   end
+
   private
 
   def session_params
