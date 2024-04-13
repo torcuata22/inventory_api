@@ -1,4 +1,4 @@
 class StoreBook < ApplicationRecord
-  t.references :store, null: false, foreign_key: true
-  t.references :book, null: false, foreign_key: true
+  belongs_to :store
+  belongs_to :book
 end
