@@ -42,6 +42,9 @@ gem 'devise-jwt'
 #serializer:
 gem 'active_model_serializers'
 
+#to use soft delete (hide record instead of deleting)
+gem 'acts_as_paranoid'
+
 
 
 group :development, :test do

@@ -7,7 +7,14 @@ Rails.application.routes.draw do
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   resources :users, only: [:create]
-  resources :books
+  resources :books do
+    member do
+      post 'undelete'
+    end
+    collection do
+      get 'deleted_books'
+    end
+  end
   resources :stores
   resources :store_books, only: [:create]
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

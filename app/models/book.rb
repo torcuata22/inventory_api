@@ -5,4 +5,5 @@ class Book < ApplicationRecord
   validates :description, presence: true, length: { maximum: 500 }
   validates :publication_details, presence: true
   has_and_belongs_to_many :stores
+  acts_as_paranoid
 end
