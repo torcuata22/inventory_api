@@ -43,6 +43,15 @@ class BooksController < ApplicationController
     end
   end
 
+  def destroy_perm
+    @book = Book.with_deleted.find(params[:id])
+    if @book.really_destroy!
+      render json: { message: 'Book permanently deleted successfully' }, status: :ok
+    else
+      render json: { errors: 'Unable to permanently delete the book' }, status: :unprocessable_entity
+    end
+  end
+
   def deleted_books
     @deleted_books = Book.only_deleted.where.not(deleted_at: nil)
     render json: @deleted_books

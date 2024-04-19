@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_13_192247) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_19_014815) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -64,6 +64,27 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_13_192247) do
     t.index ["store_id", "book_id"], name: "index_books_stores_on_store_id_and_book_id"
   end
 
+  create_table "shipment_items", force: :cascade do |t|
+    t.bigint "shipment_id", null: false
+    t.bigint "book_id", null: false
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_shipment_items_on_book_id"
+    t.index ["shipment_id"], name: "index_shipment_items_on_shipment_id"
+  end
+
+  create_table "shipments", force: :cascade do |t|
+    t.bigint "book_id", null: false
+    t.bigint "store_id", null: false
+    t.date "arrival_date"
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_shipments_on_book_id"
+    t.index ["store_id"], name: "index_shipments_on_store_id"
+  end
+
   create_table "store_books", force: :cascade do |t|
     t.bigint "book_id", null: false
     t.bigint "store_id", null: false
@@ -80,6 +101,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_13_192247) do
     t.string "manager"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "books_count", default: 0
   end
 
   create_table "users", force: :cascade do |t|
@@ -101,6 +123,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_13_192247) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "books", "stores"
+  add_foreign_key "shipment_items", "books", on_delete: :cascade
+  add_foreign_key "shipment_items", "shipments", on_delete: :cascade
+  add_foreign_key "shipments", "books", on_delete: :cascade
+  add_foreign_key "shipments", "stores", on_delete: :cascade
   add_foreign_key "store_books", "books", on_delete: :cascade
   add_foreign_key "store_books", "stores", on_delete: :cascade
 end

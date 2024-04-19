@@ -1,0 +1,2 @@
+module ShipmentItemHelper
+end
