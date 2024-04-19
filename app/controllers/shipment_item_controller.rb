@@ -13,7 +13,9 @@ class ShipmentItemsController < ApplicationController
 
   private
 
-  def shipment_item_params
-    params.require(:shipment_item).permit(:shipment_id, :book_id, :quantity)
+  def shipment_params
+    params.require(:shipment).permit(:store_id, :arrival_date, shipment_items_attributes: [:book_id, :quantity])
   end
+
+
 end

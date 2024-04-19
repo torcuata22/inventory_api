@@ -6,11 +6,9 @@ class ShipmentsController < ApplicationController
     render json: @shipments
   end
 
-
   def show
     render json: @shipment
   end
-
 
   def create
     @shipment = Shipment.new(shipment_params)
@@ -22,7 +20,6 @@ class ShipmentsController < ApplicationController
     end
   end
 
-
   def update
     if @shipment.update(shipment_params)
       render json: @shipment
@@ -31,16 +28,14 @@ class ShipmentsController < ApplicationController
     end
   end
 
-
   def destroy
     @shipment.destroy
   end
 
-
   private
 
   def shipment_params
-    params.require(:shipment).permit(:book_id, :store_id, :arrival_date, :quantity)
+    params.require(:shipment).permit(:store_id, :arrival_date, shipment_items_attributes: [:quantity, :book_id])
   end
 
 
