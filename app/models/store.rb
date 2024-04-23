@@ -15,6 +15,20 @@ class Store < ApplicationRecord
     puts store_books.count
   end
 
+  def has_sufficient_inventory?(book, quantity)
+    store_book = store_books.find_by(book: book)
+    return false unless store_book
+
+    store_book.quantity >= quantity
+  end
+
+  def sell_book(book, quantity)
+    store_book = store_books.find_by(book: book)
+    return unless store_book
+
+    store_book.update(quantity: store_book.quantity - quantity)
+  end
+
   private
 
   def update_book_count_on_create

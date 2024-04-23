@@ -16,7 +16,17 @@ Rails.application.routes.draw do
       get 'deleted_books'
     end
   end
-  resources :stores
+
+  resources :stores do
+    namespace :api do
+      namespace :v1 do
+        resources :books do
+          get 'search_by_title', on: :collection
+        end
+      end
+    end
+  end
+
   resources :store_books, only: [:create]
   resources :shipments
   resources :shipment_items
