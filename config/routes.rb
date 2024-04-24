@@ -18,14 +18,23 @@ Rails.application.routes.draw do
   end
 
   resources :stores do
-    namespace :api do
-      namespace :v1 do
-        resources :books do
-          get 'search_by_title', on: :collection
-        end
-      end
+    collection do
+      get 'search_by_title'
+    end
+    member do
+      post 'sales'
     end
   end
+  # resources :stores do
+  #   namespace :api do
+  #     namespace :v1 do
+  #       resources :books do
+  #         get 'search_by_title', on: :collection
+  #         post 'sales', to: 'stores#sales'
+  #       end
+  #     end
+  #   end
+  # end
 
   resources :store_books, only: [:create]
   resources :shipments
