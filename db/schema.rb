@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_24_013418) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_26_014048) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -62,6 +62,29 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_24_013418) do
     t.bigint "store_id", null: false
     t.index ["book_id", "store_id"], name: "index_books_stores_on_book_id_and_store_id"
     t.index ["store_id", "book_id"], name: "index_books_stores_on_store_id_and_book_id"
+  end
+
+  create_table "order_items", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "book_id", null: false
+    t.integer "quantity"
+    t.decimal "price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_order_items_on_book_id"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.string "name"
+    t.string "address"
+    t.decimal "total_price"
+    t.bigint "user_id", null: false
+    t.bigint "store_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["store_id"], name: "index_orders_on_store_id"
+    t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
   create_table "shipment_items", force: :cascade do |t|
@@ -122,6 +145,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_24_013418) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "books", "stores"
+  add_foreign_key "order_items", "books", on_delete: :cascade
+  add_foreign_key "order_items", "orders", on_delete: :cascade
+  add_foreign_key "orders", "stores", on_delete: :cascade
+  add_foreign_key "orders", "users", on_delete: :cascade
   add_foreign_key "shipment_items", "books", on_delete: :cascade
   add_foreign_key "shipment_items", "shipments", on_delete: :cascade
   add_foreign_key "shipments", "stores", on_delete: :cascade

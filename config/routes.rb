@@ -25,20 +25,13 @@ Rails.application.routes.draw do
       post 'sales'
     end
   end
-  # resources :stores do
-  #   namespace :api do
-  #     namespace :v1 do
-  #       resources :books do
-  #         get 'search_by_title', on: :collection
-  #         post 'sales', to: 'stores#sales'
-  #       end
-  #     end
-  #   end
-  # end
-
   resources :store_books, only: [:create]
   resources :shipments
   resources :shipment_items
+  resources :orders do
+    resources :order_items, only: [:create, :destroy]
+  end
+
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
