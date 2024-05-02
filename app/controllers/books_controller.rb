@@ -6,12 +6,12 @@ class BooksController < ApplicationController
     render json: books
   end
 
-
+   #GET /books/:id
   def show
     render json: @book
   end
 
-
+#POST /books
   def create
     @book = Book.new(book_params)
 
@@ -22,7 +22,7 @@ class BooksController < ApplicationController
     end
   end
 
-
+#PUT /books/:id
   def update
     if @book.update(book_params)
       render json: @book, status: :ok
@@ -31,7 +31,7 @@ class BooksController < ApplicationController
     end
   end
 
-
+#DELETE /books/:id
   def destroy
     deletion_comment = params[:deletion_comment]
     if @book.update(deletion_comment: deletion_comment)
