@@ -25,7 +25,7 @@ Rails.application.routes.draw do
       post 'sales'
     end
   end
-  resources :store_books, only: [:create]
+  resources :store_books
   resources :shipments
   resources :shipment_items
   resources :orders do
