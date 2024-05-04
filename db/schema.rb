@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_26_014048) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_04_015819) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -103,6 +103,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_26_014048) do
     t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "dispatch_date"
     t.index ["store_id"], name: "index_shipments_on_store_id"
   end
 
@@ -137,6 +138,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_26_014048) do
     t.string "name"
     t.string "avatar"
     t.string "authentication_token"
+    t.string "role", default: "employee"
     t.index ["authentication_token"], name: "index_users_on_authentication_token"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
