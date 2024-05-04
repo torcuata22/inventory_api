@@ -45,9 +45,12 @@ gem 'active_model_serializers'
 #to use soft delete (hide record instead of deleting)
 gem 'acts_as_paranoid'
 
-
-
 group :development, :test do
+  # RSpec for testing
+ gem 'rspec-rails', '~> 6.1.0'
+ # Factory Bot for test data creation
+ gem 'factory_bot_rails'
+ # Debugging tools
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
 end
