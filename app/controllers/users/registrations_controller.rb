@@ -1,18 +1,18 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
 
-  def create
-    if current_user.role == 'admin'
-    build_resource(sign_up_params)
 
-    resource.save
+  def create
+    if current_user && current_user.role == 'admin'
+      build_resource(sign_up_params.merge(role: params[:user][:role]))
+
+      resource.save
       if resource.errors.empty?
         render json: resource, status: :created
       else
         render json: {
           errors: resource.errors.full_messages
         }, status: :unprocessable_entity
-
       end
     else
       render json: { error: "Unauthorized" }, status: :unauthorized

@@ -11,7 +11,27 @@
 # a separate helper file that requires the additional dependencies and performs
 # the additional setup, and require it from the spec files that actually need
 # it.
-#
+require File.expand_path('../config/environment', __dir__)
+
+
+
+RSpec.shared_examples "unauthorized_requests" do
+  it "returns unauthorized status code" do
+    expect(response).to have_http_status(:unauthorized)
+  end
+
+  it "returns error message" do
+    expect(response.body).to include("Unauthorized")
+  end
+end
+
+RSpec.configure do |config|
+  # Your existing RSpec configuration settings go here...
+
+  # Add the following line to load all files in the `spec/support` directory
+  Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
+
+end
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
