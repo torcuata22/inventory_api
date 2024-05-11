@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  puts "Routes are being loaded"
+
   devise_for :users, controllers: {
     sessions: 'users/sessions',
     registrations: 'users/registrations',

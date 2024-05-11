@@ -8,13 +8,44 @@ RSpec.describe Users::RegistrationsController, type: :controller do
       @request.env["devise.mapping"] = Devise.mappings[:user]
     end
 
+    # Define valid user data
+    let(:valid_user_data) do
+      {
+        email: 'example42@email.com',
+        password: 'password',
+        encrypted_password: 'encrypted_password',
+        reset_password_token: 'reset_password_token',
+        reset_password_sent_at: Time.now,
+        remember_created_at: Time.now,
+        name: 'Jane Doe',
+        avatar: 'avatar_url',
+        authentication_token: 'authentication_token',
+        role: 'admin',
+      }
+    end
+
+    let(:invalid_user_data) do
+      {
+        email: 'example42@test.com',
+        password: '',
+        encrypted_password: 'encrypted_password',
+        reset_password_token: 'reset_password_token',
+        reset_password_sent_at: '',
+        remember_created_at: 'noon',
+        name: 'Jane Doe',
+        avatar: '',
+        authentication_token: '',
+        role: 'administrator in it',
+      }
+    end
+
   describe '#create' do
     context 'when current_user is not admin' do
       let(:non_admin_user) { create(:user, role: 'employee') }
       before { sign_in non_admin_user }
 
       it 'returns unauthorized status' do
-        post :create, params: { user: attributes_for(:user, role: 'admin') }
+        post :create, params: { user: valid_user_data }
         expect(response).to have_http_status(:unauthorized)
       end
 
@@ -30,7 +61,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
       before { sign_in admin_user }
 
       it 'creates a new admin user' do
-        post :create, params: { user: attributes_for(:user, role: 'admin') }
+        post :create, params: { user: valid_user_data }
         expect(response).to have_http_status(:created)
       end
 
@@ -46,8 +77,8 @@ RSpec.describe Users::RegistrationsController, type: :controller do
 
       it 'increments user count' do
         expect {
-          post :create, params: { user: attributes_for(:user) }
-        }.to change(User, :count).by(3)
+          post :create, params: { user: valid_user_data }
+        }.to change(User, :count).by(1)
       end
     end
 
@@ -86,7 +117,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
     context 'when invalid data is provided' do
       let(:invalid_user_data) do
         {
-          email: 'example@test.com',
+          email: 'example42@test.com',
           password: '',
           encrypted_password: 'encrypted_password',
           reset_password_token: 'reset_password_token',
@@ -115,7 +146,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
     context 'when valid data is provided' do
       let(:valid_user_data) do
         {
-          email: 'example@test.com',
+          email: 'example42@testemail.com',
           password: 'password',
           encrypted_password: 'encrypted_password',
           reset_password_token: 'reset_password_token',

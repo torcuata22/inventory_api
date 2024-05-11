@@ -4,20 +4,27 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def create
     if current_user && current_user.role == 'admin'
-      build_resource(sign_up_params.merge(role: params[:user][:role]))
+      new_user = User.new(new_user_params)
 
-      resource.save
-      if resource.errors.empty?
-        render json: resource, status: :created
+      puts "Current user: #{current_user.inspect}"
+      puts "Current user role: #{current_user.role}"
+      puts "Built resource: #{new_user.inspect}"
+
+      if new_user.save
+        puts "Resource saved successfully"
+        render json: new_user, status: :created
       else
+        puts "Errors occurred during resource creation: #{new_user.errors.full_messages}"
         render json: {
-          errors: resource.errors.full_messages
+          errors: new_user.errors.full_messages
         }, status: :unprocessable_entity
       end
     else
+      puts "Unauthorized access"
       render json: { error: "Unauthorized" }, status: :unauthorized
     end
   end
+
 
 
   private
@@ -25,6 +32,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def sign_up_params
     params.require(:user).permit(:email, :password, :password_confirmation, :name, :avatar)
   end
+
+  def new_user_params
+    params.require(:user).permit(:email, :password, :password_confirmation, :name, :avatar, :role)
+  end
+
 
   # before_action :configure_sign_up_params, only: [:create]
   # before_action :configure_account_update_params, only: [:update]

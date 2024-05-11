@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :user do
-    email { 'example@test.com' }
-    password { 'password' }
+    email { 'admin4@testemail.com' }
+    password { 'password1' }
     encrypted_password { 'encrypted_password' }
     reset_password_token { 'reset_password_token' }
     reset_password_sent_at { -> { Time.now } }  # Use a lambda or block for dynamic timestamp
@@ -13,8 +13,8 @@ FactoryBot.define do
   end
 
   factory :manager_user, class: 'User' do
-    email { 'manager@test.com' }
-    password { 'password' }
+    email { 'manager4@testemail.com' }
+    password { 'password2' }
     encrypted_password { 'encrypted_password' }
     reset_password_token { 'reset_password_token' }
     reset_password_sent_at { -> { Time.now } }  # Use a lambda or block for dynamic timestamp
@@ -26,8 +26,8 @@ FactoryBot.define do
   end
 
   factory :employee_user, class: 'User' do
-    email { 'employee@test.com' }
-    password { 'password' }
+    email { 'employee4@testemail.com' }
+    password { 'password3' }
     encrypted_password { 'encrypted_password' }
     reset_password_token { 'reset_password_token' }
     reset_password_sent_at { -> { Time.now } }  # Use a lambda or block for dynamic timestamp
