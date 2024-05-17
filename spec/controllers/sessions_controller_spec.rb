@@ -41,37 +41,36 @@ RSpec.describe Users::SessionsController, type: :controller do
     end
   end
 
+
   describe "DELETE #destroy" do
-    context "when user is logged in" do
-      before { sign_in admin_user }
+  context "when user is logged in" do
+    before { sign_in admin_user }
 
-      it "logs out the user" do
-        delete :destroy
-        expect(response).to have_http_status(:no_content)
-      end
+    it "logs out the user" do
+      delete :destroy
+      expect(response).to have_http_status(:no_content)
+      expect(response.body).to be_empty # No JSON body expected
     end
+  end
+end
 
+  describe "DELETE #destroy" do
+  before { sign_in admin_user }
     context "when no user is logged in" do
       it "returns an error response" do
         # Ensure there is no signed-in user by stubbing the current_user method
         allow(controller).to receive(:current_user).and_return(nil)
 
-        # Send the DELETE request to the destroy action, the error is HERE, in this line:
+        # Send the DELETE request to the destroy action
         delete :destroy
 
-        # Check that the response status is :unauthorized
-        expect(response).to have_http_status(:unauthorized)
+        # Check that the response status is :unprocessable_entity
+        expect(response).to have_http_status(:unprocessable_entity)
+
+        # Check that the response includes the expected JSON message
+        json_response = JSON.parse(response.body)
+        expect(json_response["message"]).to eq("No user logged in")
       end
     end
-
-    # context "when no user is logged in" do
-    #   puts "will it run?"
-    #   it "returns an error response" do
-    #     puts"starting test"
-    #     delete :destroy
-    #     puts "RESPONSE: #{response.inspect}"
-    #     expect(response).to have_http_status(:unauthorized)
-    #   end
-    # end
   end
 end

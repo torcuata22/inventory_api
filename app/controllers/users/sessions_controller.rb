@@ -1,4 +1,5 @@
 class Users::SessionsController < Devise::SessionsController
+
   respond_to :json
   # before_action :configure_sign_in_params, only: [:create]
 
@@ -20,23 +21,25 @@ class Users::SessionsController < Devise::SessionsController
   end
 
 
-  # def destroy
-  #   if current_user
-  #     sign_out current_user
-  #     render json: {message: 'User logged out successfull'}, status: :no_content
-  #   else
-  #     render json: {message: 'No user logged in'}, status: :unprocessable_entity
-  #   end
-  # end
-
   def destroy
     if current_user
       sign_out current_user
       head :no_content
     else
-      head :unauthorized
+      render json: {message: 'No user logged in'}, status: :unprocessable_entity
     end
   end
+
+
+
+  # def destroy
+  #   if current_user
+  #     sign_out current_user
+  #     head :no_content
+  #   else
+  #     head :unauthorized
+  #   end
+  # end
 
 
   private
@@ -44,4 +47,5 @@ class Users::SessionsController < Devise::SessionsController
   def session_params
     params.permit(:email, :password)
   end
+
 end
