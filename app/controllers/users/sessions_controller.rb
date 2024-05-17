@@ -2,7 +2,7 @@ class Users::SessionsController < Devise::SessionsController
   respond_to :json
   # before_action :configure_sign_in_params, only: [:create]
 
-  def new
+  def create
     puts "Params received: #{params.inspect}"
     user = User.find_by(email: params[:user][:email])
 
@@ -15,18 +15,29 @@ class Users::SessionsController < Devise::SessionsController
 
     else
       puts "User not found or invalid password"
-      render json: { error: 'Invalid email or password' }, status: :unprocessable_entity
+      render json: { error: 'Invalid email or password' }, status: :unauthorized
     end
   end
+
+
+  # def destroy
+  #   if current_user
+  #     sign_out current_user
+  #     render json: {message: 'User logged out successfull'}, status: :no_content
+  #   else
+  #     render json: {message: 'No user logged in'}, status: :unprocessable_entity
+  #   end
+  # end
 
   def destroy
     if current_user
       sign_out current_user
-      render json: {message: 'User logged out successfulle'}, status: :ok
+      head :no_content
     else
-      render json: {message: 'No user logged in'}, status: :unprocessable_entity
+      head :unauthorized
     end
   end
+
 
   private
 

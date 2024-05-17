@@ -115,6 +115,10 @@ RSpec.describe Users::RegistrationsController, type: :controller do
     end
 
     context 'when invalid data is provided' do
+      before do
+        @admin_user = FactoryBot.create(:user, role: 'admin')
+        sign_in @admin_user
+      end
       let(:invalid_user_data) do
         {
           email: 'example42@test.com',
@@ -139,11 +143,15 @@ RSpec.describe Users::RegistrationsController, type: :controller do
       it 'returns error response' do
         post :create, params: { user: invalid_user_data }
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.body).to include('error') # Check for specific error message in response
+        expect(response.body).to include('error')
       end
     end
 
     context 'when valid data is provided' do
+      before do
+        @admin_user = FactoryBot.create(:user, role: 'admin')
+        sign_in @admin_user
+      end
       let(:valid_user_data) do
         {
           email: 'example42@testemail.com',
