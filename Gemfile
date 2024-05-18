@@ -45,6 +45,9 @@ gem 'active_model_serializers'
 #to use soft delete (hide record instead of deleting)
 gem 'acts_as_paranoid'
 
+#debugging gem:
+gem 'pry'
+
 group :development, :test do
   # RSpec for testing
  gem 'rspec-rails', '~> 6.1.0'

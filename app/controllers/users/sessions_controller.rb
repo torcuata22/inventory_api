@@ -32,16 +32,6 @@ class Users::SessionsController < Devise::SessionsController
 
 
 
-  # def destroy
-  #   if current_user
-  #     sign_out current_user
-  #     head :no_content
-  #   else
-  #     head :unauthorized
-  #   end
-  # end
-
-
   private
 
   def session_params
