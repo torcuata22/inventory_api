@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :shipment_item do
-    shipment_id { 8765003 } #bigint
-    book_id { 33289 } #bigint
+    association :shipment #instead of hard coding id
+    association :book  #instead of hard coding id
     quantity { 35 } #numeric
     created_at { Time.now } #static
     updated_at { Time.now } #static
