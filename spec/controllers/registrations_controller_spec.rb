@@ -11,7 +11,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
     # Define valid user data
     let(:valid_user_data) do
       {
-        email: 'example42@email.com',
+        email: 'example4242@email.com',
         password: 'password',
         encrypted_password: 'encrypted_password',
         reset_password_token: 'reset_password_token',
@@ -26,7 +26,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
 
     let(:invalid_user_data) do
       {
-        email: 'example42@test.com',
+        email: 'example41@test.com',
         password: '',
         encrypted_password: 'encrypted_password',
         reset_password_token: 'reset_password_token',
@@ -40,14 +40,14 @@ RSpec.describe Users::RegistrationsController, type: :controller do
     end
 
   describe '#create' do
-    context 'when current_user is not admin' do
-      let(:non_admin_user) { create(:user, role: 'employee') }
-      before { sign_in non_admin_user }
+  context 'when current_user is not admin' do
+    let(:non_admin_user) { create(:user, role: 'employee', email: 'non_admin31@example.com') }
+    before { sign_in non_admin_user }
 
-      it 'returns unauthorized status' do
-        post :create, params: { user: valid_user_data }
-        expect(response).to have_http_status(:unauthorized)
-      end
+    it 'returns unauthorized status' do
+      post :create, params: { user: valid_user_data }
+      expect(response).to have_http_status(:unauthorized)
+    end
 
       it 'does not create a new admin user' do
         expect {
@@ -57,11 +57,14 @@ RSpec.describe Users::RegistrationsController, type: :controller do
     end
 
     context 'when current user is admin' do
-      let(:admin_user) { create(:user, role: 'admin') }
+      # let(:admin_user) { create(:user, role: 'admin') }
+      let(:admin_user) { create(:user, role: 'admin', email: 'admin@example.com') }
+
       before { sign_in admin_user }
 
       it 'creates a new admin user' do
-        post :create, params: { user: valid_user_data }
+        admin_params = valid_user_data.merge(email: 'admin25@example.com')
+        post :create, params: { user: admin_params }
         expect(response).to have_http_status(:created)
       end
 
@@ -83,7 +86,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
     end
 
     context 'when current user is manager' do
-      let(:manager_user) { create(:user, role: 'manager') }
+      let(:manager_user) { create(:user, role: 'manager', email: 'manager@example.com') }
       before { sign_in manager_user }
 
       it 'returns unauthorized status' do
@@ -99,7 +102,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
     end
 
     context 'when current user is employee' do
-      let(:employee_user) { create(:user, role: 'employee') }
+      let(:employee_user) { create(:user, role: 'employee', email:'employee_email39@email.com') }
       before { sign_in employee_user }
 
       it 'returns unauthorized status' do

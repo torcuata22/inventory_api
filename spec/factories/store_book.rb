@@ -1,3 +1,4 @@
+
 FactoryBot.define do
   factory :store_book do
     association :book #creates association with a book

@@ -1,6 +1,6 @@
 require 'pry'
 
-RSpec.describe User, type: :model do
+RSpec.describe Book, type: :model do
   describe 'validations' do
     it "is invalid without a title" do
       book = build(:book, title: nil)

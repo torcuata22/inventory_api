@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :user do
-    email { 'admin4@testemail.com' }
+    sequence(:email) { |n| "admin#{n}@testemail.com" }
     password { 'password1' }
-    reset_password_token { 'reset_password_token' }
+    reset_password_token { SecureRandom.urlsafe_base64 }
     reset_password_sent_at { -> { Time.now } }  # Use a lambda or block for dynamic timestamp
     remember_created_at { -> { Time.now } }     # Use a lambda or block for dynamic timestamp
     name { 'Jane Doe' }
@@ -12,9 +12,9 @@ FactoryBot.define do
   end
 
   factory :manager_user, class: 'User' do
-    email { 'manager4@testemail.com' }
+    sequence(:email) { |n| "manager#{n}@testemail.com" }
     password { 'password2' }
-    reset_password_token { 'reset_password_token' }
+    reset_password_token { SecureRandom.urlsafe_base64 }
     reset_password_sent_at { -> { Time.now } }  # Use a lambda or block for dynamic timestamp
     remember_created_at { -> { Time.now } }     # Use a lambda or block for dynamic timestamp
     name { 'Zoey Doe' }
@@ -24,9 +24,9 @@ FactoryBot.define do
   end
 
   factory :employee_user, class: 'User' do
-    email { 'employee4@testemail.com' }
+    sequence(:email) { |n| "employee#{n}@testemail.com" }
     password { 'password3' }
-    reset_password_token { 'reset_password_token' }
+    reset_password_token { SecureRandom.urlsafe_base64 }
     reset_password_sent_at { -> { Time.now } }  # Use a lambda or block for dynamic timestamp
     remember_created_at { -> { Time.now } }     # Use a lambda or block for dynamic timestamp
     name { 'Joey Doe' }
