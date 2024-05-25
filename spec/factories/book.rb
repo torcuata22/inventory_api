@@ -16,7 +16,7 @@ FactoryBot.define do
 
     #create store_id dynamically, not hard coded
     transient do
-      store { nil }
+      store { create(:store) }
     end
 
     after(:create) do |book, evaluator|
