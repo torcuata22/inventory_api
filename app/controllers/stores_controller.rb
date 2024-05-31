@@ -58,6 +58,7 @@ class StoresController < ApplicationController
     render json: @store
   end
 
+
   def inventory
     if params[:title]
       # Search for books by title
