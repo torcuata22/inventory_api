@@ -67,4 +67,74 @@ RSpec.describe 'Stores Routes', type: :routing do
     expect(post: 'stores/1/sales').to route_to(controller: 'stores', action: 'sales', id:'1')
   end
 
+  it 'routes GET /stores/:id/update to store#update' do
+      expect(put: 'stores/1').to route_to(controller: 'stores', action: 'update', id:'1')
+  end
+
+  it 'routes DELETE /stores/:id to store#destroy' do
+    expect(delete: 'stores/1').to route_to(controller: 'stores', action: 'destroy', id: '1')
+  end
+end
+
+RSpec.describe 'Store_Book Routes' do
+
+  it 'routes GET /store_books to store_books#index' do
+    expect(get: '/store_books').to route_to(controller: 'store_books', action: 'index')
+  end
+
+  it 'routes POST /store_books to store_books#create' do
+    expect(post: '/store_books').to route_to(controller: 'store_books', action: 'create')
+  end
+
+  it 'routes GET /store_books/:id to store_books#show' do
+    expect(get: '/store_books/1').to route_to(controller: 'store_books', action: 'show', id: '1')
+  end
+
+  it 'routes DELETE /store_books/1 to store_books#destroy' do
+    expect(delete: '/store_books/1').to route_to(controller: 'store_books', action: 'destroy', id: '1')
+  end
+
+end
+
+RSpec.describe 'Shipment Routes' do
+
+  it 'routes GET /shipments to shipments#index' do
+    expect(get: '/shipments').to route_to(controller: 'shipments', action:'index')
+  end
+
+  it 'routes GET /shipments/:id to shipments#show' do
+    expect(get: '/shipments/1').to route_to(controller: 'shipments', action:'show', id: '1')
+  end
+
+  it 'routes POST /shipments to shipments#create' do
+    expect(post: '/shipments').to route_to(controller: 'shipments', action:'create')
+  end
+
+  it 'routes DELETE /shipments/1 to shipments#destroy' do
+    expect(delete: '/shipments/1').to route_to(controller: 'shipments', action:'destroy', id:'1')
+  end
+
+  it 'routes PUT /shipments/1 to shipments#update' do
+    expect(put: '/shipments/1').to route_to(controller: 'shipments', action:'update', id:'1')
+  end
+end
+
+RSpec.describe 'Shipment_Item Routes' do
+
+  it 'routes POST /shipment_items to shipment_items#create' do
+    expect(post: '/shipment_items').to route_to(controller: 'shipment_items', action: 'create')
+  end
+
+end
+
+
+RSpec.describe 'Orders Routes' do
+
+  it 'routes POST /orders/:order_id/order_items to order_items#create' do
+    expect(post: 'orders/1/order_items').to route_to(controller: 'order_items', action: 'create', order_id: '1')
+  end
+
+  it 'routes DELETE /orders/:order_id/order_items/:id to order_items#destroy' do
+    expect(delete: '/orders/1/order_items/1').to route_to(controller: 'order_items', action: 'destroy', order_id: '1', id: '1')
+  end
 end

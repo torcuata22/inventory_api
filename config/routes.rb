@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   resources :stores do
     collection do
       get 'search_by_title'
+      put 'update'
     end
     member do
       post 'sales'
