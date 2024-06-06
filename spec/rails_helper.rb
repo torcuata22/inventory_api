@@ -26,20 +26,19 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 
 RSpec.configure do |config|
+  # Include Devise test helpers
   config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::IntegrationHelpers, type: :request
 
   # Add a helper method to sign in users
-  def sign_in(user)
-    @request.env['devise.mapping'] = Devise.mappings[:user]
-    sign_in user
-  end
-end
+  config.include Module.new {
+    def sign_in_user(user = FactoryBot.create(:user))
+      sign_in user
+    end
+  }, type: :controller
 
-RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_paths = [
-    Rails.root.join('spec/fixtures')
-  ]
+  config.fixture_path = "#{::Rails.root}/spec/fixtures"
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -68,6 +67,6 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+
   config.include FactoryBot::Syntax::Methods
-  require_relative 'support/factory_bot'
 end

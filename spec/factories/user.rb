@@ -21,6 +21,14 @@ FactoryBot.define do
     avatar { 'avatar_url' }
     authentication_token { 'authentication_token' }
     role { 'manager' }
+    # Conditionally include the association with store
+    transient do
+      with_store { true }
+    end
+
+    after(:build) do |user, evaluator|
+      user.store = create(:store) if evaluator.with_store
+    end
   end
 
   factory :employee_user, class: 'User' do
@@ -33,5 +41,13 @@ FactoryBot.define do
     avatar { 'avatar_url' }
     authentication_token { 'authentication_token' }
     role { 'employee' }
+  # Conditionally include the association with store
+    transient do
+      with_store { true }
+    end
+
+    after(:build) do |user, evaluator|
+      user.store = create(:store) if evaluator.with_store
+    end
   end
 end
