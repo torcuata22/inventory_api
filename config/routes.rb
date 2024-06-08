@@ -8,11 +8,12 @@ Rails.application.routes.draw do
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   resources :users, only: [:create]
+
   resources :books do
     member do
       post 'undelete'
+      delete 'destroy_perm'
     end
-    delete 'destroy_perm'
     collection do
       get 'deleted_books'
     end
