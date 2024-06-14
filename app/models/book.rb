@@ -1,5 +1,4 @@
 class Book < ApplicationRecord
-  acts_as_paranoid
   validates :title, presence: true, length: { maximum: 255 }
   validates :author, presence: true, length: { maximum: 100 }
   # validates :isbn, presence: true, uniqueness: true, length: { maximum: 20 }
@@ -10,11 +9,19 @@ class Book < ApplicationRecord
   has_many :shipment_items
   has_many :shipments, through: :shipment_items
 
-  def really_destroy!
-    puts "Entering really_destroy! method for BOOK ID: #{self.id}"
-    result = self.class.unscoped.where(id: self.id).delete_all
-    puts "Number of records deleted: #{result}"
-    result
+
+  scope :not_deleted, -> { where(deleted_at: nil) }
+  scope :deleted, -> { where.not(deleted_at: nil) }
+
+  def soft_delete
+    update(deleted_at: Time.current)
   end
 
+  def recover
+    update(deleted_at: nil)
+  end
+
+  def deleted?
+    deleted_at.present?
+  end
 end

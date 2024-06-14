@@ -1,14 +1,20 @@
+# app/models/user.rb
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # Devise modules
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # Associations
   has_many :orders
-
-  ROLES = %w[admin manager employee].freeze
-
   belongs_to :store, optional: true
+
+  # Validations
+  validates :email, presence: true, uniqueness: true
+  validates :password, presence: true, confirmation: true
+  validates :password_confirmation, presence: true, if: -> { password.present? }
+
+  # Roles
+  ROLES = %w[admin manager employee].freeze
 
   def admin?
     role == 'admin'
@@ -25,5 +31,4 @@ class User < ApplicationRecord
   def assign_to_store(store)
     update(store: store) if manager? || employee?
   end
-
 end

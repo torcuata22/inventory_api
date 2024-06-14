@@ -1,6 +1,6 @@
 class BooksController < ApplicationController
-  before_action :set_book, only: [:show, :update, :destroy, :destroy_perm, :undelete]
   before_action :authenticate_user! # Ensure the user is authenticated for all actions
+  before_action :set_book, only: [:show, :update, :destroy, :destroy_perm, :undelete]
   before_action :authorize_admin_or_manager, only: [:create, :update, :destroy, :destroy_perm, :deleted_books, :undelete]
 
 
@@ -20,7 +20,10 @@ def create
 
   if current_user.manager? || current_user.employee?
     @book.stores << current_user.store
+    puts "FROM CONTROLLER --CURRENT USER STORE ID FROM CONTROLLER: #{current_user.store_id}"
   end
+
+  puts "FROM CONTROLLER --PARAMS: #{params.inspect}"
 
   if @book.save
     render json: @book, status: :created
@@ -28,6 +31,24 @@ def create
     render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
   end
 end
+
+
+# def create
+#   @book = Book.new(book_params)
+
+#   if current_user.manager? || current_user.employee?
+#     store_book = StoreBook.new(book: @book, store: current_user.store)
+#     unless store_book.save
+#       render json: { errors: store_book.errors.full_messages }, status: :unprocessable_entity and return
+#     end
+#   end
+
+#   if @book.save
+#     render json: @book, status: :created
+#   else
+#     render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
+#   end
+# end
 
 #PUT /books/:id
 def update
@@ -48,50 +69,89 @@ def update
   end
 end
 
-
-#THESE ACTIONS NEED TO BE UPDATED TO REFLECT PERMISSIONS
 #DELETE /books/:id
+# def destroy
+#   if current_user.admin? || (current_user.manager? && @book.stores.exists?(id: current_user.store_id))
+#     deletion_comment = params[:deletion_comment]
+#     if @book.update(deletion_comment: deletion_comment)
+#       @book.soft_delete
+#       render json: { message: 'Book deleted successfully' }, status: :ok
+#     else
+#       render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
+
+#     end
+#   else
+#     render json: { errors: 'You are not authorized to delete this book' }, status: :forbidden
+#   end
+# end
+
+# def destroy
+#   if current_user.admin?
+#     delete_book
+#   elsif current_user.manager?
+#     delete_book if current_user.store && @book.stores.exists?(id: current_user.store.id)
+#     puts "STORE_ID after soft_deletion CONTROLLER: #{current_user.store.id}"
+#   else
+#     render json: { errors: 'You are not authorized to delete books' }, status: :forbidden
+#   end
+# end
+
 def destroy
+  puts "ENTERED SOF DELETE"
   if current_user.admin? || (current_user.manager? && @book.stores.exists?(id: current_user.store_id))
-    deletion_comment = params[:deletion_comment]
-    if @book.update(deletion_comment: deletion_comment)
-      if @book.destroy
-        render json: { message: 'Book deleted successfully' }, status: :ok
-      else
-        render json: { errors: 'Unable to delete the book' }, status: :unprocessable_entity
-      end
+    if @book.soft_delete
+      puts "FROM SOFT DELETE IN CONTROLLER: DELETED_AT FLAG SET TO: #{@book.deleted_at}"
+      render json: { message: 'Book deleted successfully' }, status: :ok
     else
-      render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: 'Unable to delete the book' }, status: :unprocessable_entity
     end
   else
     render json: { errors: 'You are not authorized to delete this book' }, status: :forbidden
   end
+  puts "FINISHED SOFT DELETE"
 end
 
 
+# DELETE /books/:id/permanent
 def destroy_perm
   puts 'ENTERED DESTROY PERM'
-  @book = Book.with_deleted.find(params[:id])
+  @book = Book.deleted.find_by(id: params[:id])
 
   unless @book
     puts "Book not found"
     render json: { errors: 'Book not found' }, status: :not_found
+    return
   end
 
-  puts "Book found: #{@book.inspect}"
-  puts "Current user: #{current_user.inspect}"
-  puts "Book count before destroy: #{Book.with_deleted.count}"
-
   if current_user.admin? || (current_user.manager? && @book.stores.exists?(id: current_user.store_id))
-    if @book.really_destroy!
-      puts 'book destroyed, really!'
-      puts "Book count after destroy: #{Book.with_deleted.count}"
-      render json: { message: 'Book permanently deleted successfully' }, status: :ok
+    puts "Store ID before destroy: #{@book.store_id}"
+    # if @book.deleted_at.present?
+      unless @book
+        render json: { errors: 'Book not found' }, status: not_found
+
+      end
+      unless @book.deleted_at.present?
+        render json: { errors: 'Book has not been soft-deleted yet' }, status: :unprocessable_entity
+        return
+      end
+
+      puts "STORE ID BEFORE DESTROY: #{@book.store_id}"
+
+      if @book.destroy
+        puts "This is the store id AFTER perm_destroy: #{current_user.store_id}"
+        puts 'book destroyed, really!'
+        puts "Book count after destroy: #{Book.count}"
+        puts "With deleted Book count after destroy: #{Book.not_deleted.count}"
+        render json: { message: 'Book permanently deleted successfully' }, status: :ok
+      else
+        puts 'book was not really destroyed'
+        render json: { errors: 'Unable to permanently delete the book' }, status: :unprocessable_entity
+      end
+    # else
+    #   render json: { errors: 'Book has not been soft-deleted yet' }, status: :unprocessable_entity
+    # end
+
     else
-      puts 'book was not really destroyed'
-      render json: { errors: 'Unable to permanently delete the book' }, status: :unprocessable_entity
-    end
-  else
     puts 'Not authorized to delete the book'
     render json: { errors: 'You are not authorized to permanently delete this book' }, status: :forbidden
   end
@@ -99,7 +159,7 @@ end
 
 
   def deleted_books
-    @deleted_books = Book.only_deleted.where.not(deleted_at: nil)
+    @deleted_books = Book.not_deleted.where.not(deleted_at: nil)
     render json: @deleted_books
   end
 
@@ -107,7 +167,7 @@ end
   def undelete
     book_id = params[:id].to_i
     puts "BOOK ID: #{book_id}"
-    @book = Book.only_deleted.find(book_id)
+    @book = Book.not_deleted.find(book_id)
     unless @book
       render json: { errors: 'Book not found' }, status: :not_found
       return
@@ -125,7 +185,7 @@ end
   private
 
   def set_book
-    @book = Book.with_deleted.find_by(id: params[:id])
+    @book = Book.not_deleted.find_by(id: params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { errors: 'Book not found' }, status: :not_found unless @book
   end
@@ -138,13 +198,27 @@ end
     return if current_user.manager? && action_name == 'create'
 
     # Otherwise, ensure the user is a manager of the book's store
-    unless current_user.manager? && @book.stores.exists?(id: current_user.store_id)
+    unless current_user.manager? && @book && @book.stores.exists?(id: current_user.store_id)
       render json: { errors: 'You are not authorized to perform this action' }, status: :forbidden
     end
   end
 
 
   def book_params
-    params.require(:book).permit(:title, :author, :isbn, :description, :publication_details, :deletion_comment)
+    params.require(:book).permit(:title, :author, :isbn, :description, :publication_details, :deletion_comment, :store_id)
   end
+
+
+  def delete_book
+    deletion_comment = params[:deletion_comment]
+    if @book.update(deletion_comment: deletion_comment)
+      @book.soft_delete
+      render json: { message: 'Book deleted successfully' }, status: :ok
+    else
+      render json: { errors: 'Unable to delete the book' }, status: :unprocessable_entity
+    end
+  end
+
+
+
 end

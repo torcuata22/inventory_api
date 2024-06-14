@@ -1,42 +1,31 @@
+# app/controllers/users/registrations_controller.rb
 class Users::RegistrationsController < Devise::RegistrationsController
+  before_action :configure_sign_up_params, only: [:create]
+  before_action :configure_account_update_params, only: [:update]
 
   respond_to :json
 
-
   def create
-    if current_user && current_user.role == 'admin'
-      new_user = User.new(new_user_params)
+    @user = User.new(sign_up_params)
 
-      puts "Current user: #{current_user.inspect}"
-      puts "Current user role: #{current_user.role}"
-      puts "Built resource: #{new_user.inspect}"
-
-      if new_user.save
-        puts "Resource saved successfully"
-        render json: new_user, status: :created
-      else
-        puts "Errors occurred during resource creation: #{new_user.errors.full_messages}"
-        render json: {
-          errors: new_user.errors.full_messages
-        }, status: :unprocessable_entity
-      end
+    if @user.save
+      render json: @user, status: :created
     else
-      puts "Unauthorized access"
-      render json: { error: "Unauthorized" }, status: :unauthorized
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
   end
-
-
 
   private
 
   def sign_up_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :name, :avatar)
-  end
-
-  def new_user_params
     params.require(:user).permit(:email, :password, :password_confirmation, :name, :avatar, :role)
   end
+
+  def configure_sign_up_params
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:email, :password, :password_confirmation, :name, :avatar, :role])
+  end
+end
+
 
 
   # before_action :configure_sign_up_params, only: [:create]
@@ -97,4 +86,3 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # def after_inactive_sign_up_path_for(resource)
   #   super(resource)
   # end
-end

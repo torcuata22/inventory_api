@@ -12,7 +12,9 @@ Rails.application.routes.draw do
   resources :books do
     member do
       post 'undelete'
+      put 'destroy'
       delete 'destroy_perm'
+
     end
     collection do
       get 'deleted_books'
