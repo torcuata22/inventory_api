@@ -237,15 +237,21 @@ end
 
 
   describe 'DELETE #destroy_perm' do
-      let!(:book) { create(:book) }
+      let(:book) { create(:book) }
       before do
         book.soft_delete
+        book.reload
+        puts " SOFT DELETION TIME: #{book.deleted_at}"
       end
 
       context 'when admin is signed in' do
+        let(:admin) { create(:user, role: 'admin') }
+        let(:book) { create(:book) }
         before do
           sign_in admin
           puts "Admin is signed in: #{admin.inspect}"
+          book.soft_delete
+          book.reload
           # book.destroy # Soft delete the book (first step for permanent deletion)
         end
 
@@ -257,61 +263,56 @@ end
         end
       end
 
-    context 'when manager is signed in' do
-      let(:store) { create(:store) }
-      let(:manager_user) { create(:user, email: 'store_manager@email.com', role: 'manager', store: store) }
-      let(:book) { create(:book) }
-      # let(:store_book) { create(:store_book, book: book, store: store) }
+      context 'when manager is signed in' do
+        let(:store) { create(:store) }
+        let(:manager_user) { create(:user, email: 'store_manager@email.com', role: 'manager', store: store) }
+        let(:book) { create(:book, stores: [store]) }
 
-      before do
-        sign_in manager_user
-        store.books << book # Ensure the book is associated with the store
-        book.reload
-        puts "Manager store: #{manager_user.store.id}"
-        puts "Book store: #{book.stores.map(&:id)}"
+        before do
+          sign_in manager_user
+          store.books << book
+          book.reload
+          book.soft_delete
+          book.reload
+          puts "Manager store: #{manager_user.store.id}"
+          puts "Book store: #{book.stores.map(&:id)}"
+          puts "Book soft deleted: #{book.deleted_at.present?}"
+        end
+
+        it 'permanently deletes the book in their store' do
+          puts "Before destroy_perm - Deleted books count: #{Book.deleted.count}"
+          expect {
+            delete :destroy_perm, params: { id: book.id }
+            puts "Controller action completed"
+            book.reload
+            puts "Book destroyed: #{book.destroyed?}"
+            puts "After destroy_perm - Deleted books count: #{Book.deleted.count}"
+          }.to change { Book.deleted.count }.by(-1)
+          expect(response).to have_http_status(:ok)
+        end
+
+        it 'returns forbidden status if manager tries to permanently delete a book not in their store' do
+          other_store = create(:store)
+          other_book = create(:book, stores: [other_store])
+          other_book.soft_delete
+          other_book.reload
+          delete :destroy_perm, params: { id: other_book.id }
+          expect(response).to have_http_status(:forbidden)
+        end
       end
 
-
-      #FAILURE
-      it 'permanently deletes the book in their store' do
-        puts "TOTAL BOOK COUNT BEFORE PERM DELETE: #{Book.unscoped.count}"
-        puts "NOT DELETED BOOK COUNT BEFORE PERM DELETE: #{Book.not_deleted.count}"
-        puts "FROM TEST: STORE ID IS #{manager_user.store_id}"
-
-        # Output the book, manager, and store data
-        puts "FROM THE TEST:"
-        puts "Book: #{book.inspect}"
-        puts "Manager: #{manager_user.inspect}"
-        puts "Store: #{manager_user.store.inspect}"
-
-
-
-        expect {
-          delete :destroy_perm, params: { id: book.id }
-        }.to change { Book.not_deleted.count }.by(-1)
-        expect(response).to have_http_status(:ok)
-      end
-
-      it 'returns forbidden status if manager tries to permanently delete a book not in their store' do
-        other_store = create(:store)
-        other_book = create(:book, stores: [other_store])
-        other_book.soft_delete
-        delete :destroy_perm, params: { id: other_book.id }
-        expect(response).to have_http_status(:forbidden)
-      end
-    end
-
-    context 'when employee is signed in' do
-      before do
-        sign_in employee
-      end
+      context 'when employee is signed in' do
+        before do
+          sign_in employee
+        end
 
         it 'returns forbidden status' do
           expect {
             delete :destroy_perm, params: { id: book.id }
-        }.not_to change{ Book.deleted.count }
-        expect(response).to have_http_status(:forbidden)
+          }.not_to change{ Book.deleted.count }
+          expect(response).to have_http_status(:forbidden)
         end
       end
+
     end
   end

@@ -9,9 +9,9 @@ class Book < ApplicationRecord
   has_many :shipment_items
   has_many :shipments, through: :shipment_items
 
-
-  scope :not_deleted, -> { where(deleted_at: nil) }
   scope :deleted, -> { where.not(deleted_at: nil) }
+  scope :not_deleted, -> { where(deleted_at: nil) }
+
 
   def soft_delete
     update(deleted_at: Time.current)
