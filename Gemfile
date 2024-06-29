@@ -37,7 +37,8 @@ gem "rack-cors"
 
 #authentication:
 gem 'devise', '~> 4.9'
-gem 'devise-jwt', '~> 0.11.0'
+# gem 'devise-jwt', '~> 0.11.0'
+gem 'jwt_sessions'
 
 #serializer:
 gem 'active_model_serializers'

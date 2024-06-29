@@ -12,6 +12,7 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   validates :password, presence: true, confirmation: true
   validates :password_confirmation, presence: true, if: -> { password.present? }
+  validates :store, presence: true, if: -> { manager? }
 
   # Roles
   ROLES = %w[admin manager employee].freeze

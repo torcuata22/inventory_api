@@ -105,20 +105,8 @@ GEM
       railties (>= 4.1.0)
       responders
       warden (~> 1.2.3)
-    devise-jwt (0.11.0)
-      devise (~> 4.0)
-      warden-jwt_auth (~> 0.8)
     diff-lcs (1.5.1)
     drb (2.2.1)
-    dry-auto_inject (1.0.1)
-      dry-core (~> 1.0)
-      zeitwerk (~> 2.6)
-    dry-configurable (1.1.0)
-      dry-core (~> 1.0, < 2)
-      zeitwerk (~> 2.6)
-    dry-core (1.0.1)
-      concurrent-ruby (~> 1.0)
-      zeitwerk (~> 2.6)
     erubi (1.12.0)
     factory_bot (6.4.6)
       activesupport (>= 5.0.0)
@@ -138,8 +126,10 @@ GEM
       rdoc
       reline (>= 0.4.2)
     jsonapi-renderer (0.2.2)
-    jwt (2.8.1)
+    jwt (2.8.2)
       base64
+    jwt_sessions (3.2.2)
+      jwt (>= 2.8, < 3)
     loofah (2.22.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
@@ -264,11 +254,6 @@ GEM
       concurrent-ruby (~> 1.0)
     warden (1.2.9)
       rack (>= 2.0.9)
-    warden-jwt_auth (0.8.0)
-      dry-auto_inject (>= 0.8, < 2)
-      dry-configurable (>= 0.13, < 2)
-      jwt (~> 2.1)
-      warden (~> 1.2)
     webrick (1.8.1)
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
@@ -289,9 +274,9 @@ DEPENDENCIES
   bootsnap
   debug
   devise (~> 4.9)
-  devise-jwt (~> 0.11.0)
   factory_bot_rails
   image_processing (~> 1.2)
+  jwt_sessions
   pg (~> 1.1)
   pry
   puma (>= 5.0)
