@@ -18,13 +18,11 @@ class BooksController < ApplicationController
 def create
   @book = Book.new(book_params)
 
-  if current_user.manager? || current_user.employee?
+  if current_user.manager?
     @book.stores << current_user.store
     puts "FROM CONTROLLER --CURRENT USER STORE ID FROM CONTROLLER: #{current_user.store_id}"
     puts "FROM CONTROLLER --BOOK STORES: #{@book.stores.pluck(:id)}"
   end
-
-  puts "FROM CONTROLLER --PARAMS: #{params.inspect}"
 
   if @book.save
     puts "FROM CONTROLLER --BOOK CREATED: #{@book.inspect}"
@@ -38,15 +36,16 @@ end
 
 # def create
 #   @book = Book.new(book_params)
-
-#   if current_user.manager? || current_user.employee?
-#     store_book = StoreBook.new(book: @book, store: current_user.store)
-#     unless store_book.save
-#       render json: { errors: store_book.errors.full_messages }, status: :unprocessable_entity and return
-#     end
-#   end
-
 #   if @book.save
+
+#     if current_user.manager? || current_user.employee?
+#       store_book = StoreBook.new(book: @book, store: current_user.store)
+#       unless store_book.save
+#         render json: { errors: store_book.errors.full_messages }, status: :unprocessable_entity and return
+#       end
+#     end
+
+
 #     render json: @book, status: :created
 #   else
 #     render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
@@ -201,7 +200,7 @@ end
 
 
   def book_params
-    params.require(:book).permit(:title, :author, :isbn, :description, :publication_details, :deletion_comment, :store_id)
+    params.require(:book).permit(:title, :author, :isbn, :description, :publication_details, :deletion_comment, :deleted_at)
   end
 
 

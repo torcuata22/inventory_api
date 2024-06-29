@@ -36,8 +36,8 @@ gem "image_processing", "~> 1.2"
 gem "rack-cors"
 
 #authentication:
-gem 'devise'
-gem 'devise-jwt'
+gem 'devise', '~> 4.9'
+gem 'devise-jwt', '~> 0.11.0'
 
 #serializer:
 gem 'active_model_serializers'

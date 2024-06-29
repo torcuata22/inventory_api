@@ -288,8 +288,8 @@ DEPENDENCIES
   acts_as_paranoid
   bootsnap
   debug
-  devise
-  devise-jwt
+  devise (~> 4.9)
+  devise-jwt (~> 0.11.0)
   factory_bot_rails
   image_processing (~> 1.2)
   pg (~> 1.1)
