@@ -10,12 +10,13 @@ class Book < ApplicationRecord
   has_many :shipment_items
   has_many :shipments, through: :shipment_items
 
-  scope :deleted, -> { where.not(deleted_at: nil) }
-  scope :not_deleted, -> { where(deleted_at: nil) }
+  scope :deleted, -> { where.not(deleted_at: nil).where.not(deletion_comment: nil) }
+  scope :not_deleted, -> { where(deleted_at: nil).where(deletion_comment: nil) }
 
 
-  def soft_delete
-    update(deleted_at: Time.current)
+  def soft_delete(comment = nil)
+    update(deleted_at: Time.current, deletion_comment: comment)
+    puts "Deleted at timestamp from model: #{deleted_at} - #{deletion_comment}"
   end
 
   def recover
