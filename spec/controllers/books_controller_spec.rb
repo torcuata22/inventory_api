@@ -266,10 +266,10 @@ end
 
         before do
           sign_in manager_user
-          # store.books << book
-          # book.reload
-          # book.soft_delete
-          # book.reload
+          store.books << book
+          book.reload
+          book.soft_delete
+          book.reload
           puts "Manager store: #{manager_user.store.id}"
           puts "Book store: #{book.stores.map(&:id)}"
           puts "Book soft deleted: #{book.deleted_at.present?} and Deletion comment: #{book.deletion_comment?}"

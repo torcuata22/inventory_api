@@ -1,7 +1,8 @@
 class Store < ApplicationRecord
   enum store_type: { community: 0, mega: 1, warehouse: 2 }
-  has_and_belongs_to_many :books
   has_many :store_books, dependent: :destroy  # Define association with store_books
+  has_and_belongs_to_many :books, through: :store_books
+
   has_many :orders
 
   validates :store_name, presence: true, length: { maximum: 255 }
