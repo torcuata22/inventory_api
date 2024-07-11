@@ -2,7 +2,7 @@
 require 'rails_helper'
 
 RSpec.describe BooksController, type: :controller do
-  let(:admin) { create(:user, email: 'admin@test.com') }
+  let(:admin) { create(:user, email: 'myadmin@test.com') }
   let(:manager) { create(:manager_user, email: 'manager@test.com',  with_store: true) }
   let(:employee) { create(:employee_user, email: 'employee@test.com',  with_store: true) }
   let!(:books) { create_list(:book, 3) }
@@ -245,13 +245,14 @@ end
       end
 
       context 'when admin is signed in' do
-        let(:admin) { create(:user, role: 'admin') }
+        let(:admin) { create(:user, role: 'admin', email: 'theadmin@email.com') }
         let(:book) { create(:book) }
         before do
           sign_in admin
           puts "Admin is signed in: #{admin.inspect}"
-          book.soft_delete
-          book.reload
+          # book.destroy
+          # book.soft_delete
+          # book.reload
           # book.destroy # Soft delete the book (first step for permanent deletion)
         end
 
