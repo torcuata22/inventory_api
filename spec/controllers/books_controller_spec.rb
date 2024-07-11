@@ -250,12 +250,12 @@ end
         end
 
         it 'permanently deletes the book' do
-          puts "TOTAL Book count before test delete: #{Book.with_deleted.count}"
-          puts "With deleted Book count after test delete: #{Book.with_deleted.count}"
+          puts "TOTAL Book count before test delete: #{Book.deleted.count}"
+          puts "With deleted Book count after test delete: #{Book.deleted.count}"
           #FAILURE 1
           expect {
             delete :destroy_perm, params: { id: book.id }
-          }.to change { Book.with_deleted.count }.by(-1)
+          }.to change { Book.deleted.count }.by(-1)
           expect(response).to have_http_status(:ok)
         end
       end
@@ -270,10 +270,10 @@ end
       #FAILURE 2
       it 'permanently deletes the book in their store' do
         puts "Total Book count before test delete: #{Book.unscoped.count}"
-        puts "With deleted Book count before test delete: #{Book.with_deleted.count}"
+        puts "With deleted Book count before test delete: #{Book.deleted.count}"
         expect {
           delete :destroy_perm, params: { id: book.id }
-      }.to change { Book.with_deleted.count }.by(-1)
+      }.to change { Book.deleted.count }.by(-1)
       expect(response).to have_http_status(:ok)
       end
 
