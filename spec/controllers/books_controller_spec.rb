@@ -175,7 +175,7 @@ end
     end
   end
 
-  describe 'PUT #destroy' do
+  describe 'PUT #soft_destroy' do #NEED to change to soft_desrtoy
   # let(:book) { create(:book) }
 
   context 'when admin is signed in' do
@@ -188,7 +188,7 @@ end
 
       it 'soft deletes the book' do
         expect{
-          delete :destroy, params: { id: book.id, deletion_comment: 'Soft delete comment' }
+          delete :soft_destroy, params: { id: book.id, deletion_comment: 'Soft delete comment' }
       }.to change { Book.not_deleted.count }.by(-1)
 
         expect(response).to have_http_status(:ok)
@@ -196,7 +196,7 @@ end
 
       it 'returns unprocessable entity if book cannot be deleted' do
         allow_any_instance_of(Book).to receive(:update).and_return(false)
-        delete :destroy, params: { id: book.id,  deletion_comment: "soft delete comment" }
+        delete :soft_destroy, params: { id: book.id,  deletion_comment: "soft delete comment" }
         expect(response).to have_http_status(:unprocessable_entity)
         expect(JSON.parse(response.body)['errors']).to eq('Unable to delete the book')
       end
@@ -211,7 +211,7 @@ end
 
       it 'soft deletes the book in their store' do
         expect {
-          put :destroy, params: { id: book.id, deletion_comment: 'soft delete comment' }
+          put :soft_destroy, params: { id: book.id, deletion_comment: 'soft delete comment' }
         }.to change { book.reload.deleted_at }.from(nil).to(be_within(1.second).of(Time.current))
         expect(response).to have_http_status(:ok)
       end
@@ -219,7 +219,7 @@ end
       it 'returns forbidden status if manager tries to delete book from another store' do
         other_store = create(:store)
         other_book = create(:book, stores: [other_store])
-        put :destroy, params: { id: other_book.id, deletion_comment: 'Soft delete comment' }
+        put :soft_destroy, params: { id: other_book.id, deletion_comment: 'Soft delete comment' }
         expect(response).to have_http_status(:forbidden)
       end
     end
@@ -230,7 +230,7 @@ end
       end
 
       it 'returns forbidden status' do
-        put :destroy, params: { id: book.id, deletion_comment: 'deletion comment' }
+        put :soft_destroy, params: { id: book.id, deletion_comment: 'deletion comment' }
         expect(response).to have_http_status(:forbidden)
       end
     end
@@ -249,11 +249,6 @@ end
         let(:book) { create(:book) }
         before do
           sign_in admin
-          puts "Admin is signed in: #{admin.inspect}"
-          # book.destroy
-          # book.soft_delete
-          # book.reload
-          # book.destroy # Soft delete the book (first step for permanent deletion)
         end
 
         it 'permanently deletes the book' do
@@ -271,13 +266,13 @@ end
 
         before do
           sign_in manager_user
-          store.books << book
-          book.reload
-          book.soft_delete
-          book.reload
+          # store.books << book
+          # book.reload
+          # book.soft_delete
+          # book.reload
           puts "Manager store: #{manager_user.store.id}"
           puts "Book store: #{book.stores.map(&:id)}"
-          puts "Book soft deleted: #{book.deleted_at.present?}"
+          puts "Book soft deleted: #{book.deleted_at.present?} and Deletion comment: #{book.deletion_comment?}"
         end
 
         it 'permanently deletes the book in their store' do

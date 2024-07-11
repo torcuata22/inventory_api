@@ -1,7 +1,7 @@
 class BooksController < ApplicationController
   before_action :authenticate_user! # Ensure the user is authenticated for all actions
-  before_action :set_book, only: [:show, :update, :destroy, :destroy_perm, :undelete]
-  before_action :authorize_admin_or_manager, only: [:create, :update, :destroy, :destroy_perm, :deleted_books, :undelete]
+  before_action :set_book, only: [:show, :update, :soft_destroy, :destroy_perm, :undelete]
+  before_action :authorize_admin_or_manager, only: [:create, :update, :soft_destroy, :destroy_perm, :deleted_books, :undelete]
 
 
   def index
@@ -98,7 +98,7 @@ end
 #   end
 # end
 
-def destroy
+def soft_destroy
   puts "ENTERED SOFT DELETE"
   if current_user.admin? || (current_user.manager? && @book.stores.exists?(id: current_user.store_id))
     if @book.soft_delete

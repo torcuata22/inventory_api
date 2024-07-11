@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   resources :books do
     member do
       post 'undelete'
-      put 'destroy'
+      put 'soft_destroy'
       delete 'destroy_perm'
 
     end
