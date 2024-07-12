@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::API
 
-  # before_action :authenticate_user!
+  before_action :authenticate_user!
   before_action :authorize_admin, only: [:create_admin]
 
   def create_admin

@@ -18,6 +18,11 @@ class Book < ApplicationRecord
     update(deleted_at: Time.current)
   end
 
+  def destroy
+    puts "Destroying book with ID: #{id}"
+    super
+  end
+
   def recover
     update(deleted_at: nil)
   end

@@ -262,17 +262,18 @@ end
       context 'when manager is signed in' do
         let(:store) { create(:store) }
         let(:manager_user) { create(:user, email: 'store_manager@email.com', role: 'manager', store: store) }
-        let(:book) { create(:book, stores: [store]) }
+        let(:book) { create(:book, stores: [store], store_id: store.id) }
 
         before do
           sign_in manager_user
           store.books << book
-          book.reload
           book.soft_delete
           book.reload
           puts "Manager store: #{manager_user.store.id}"
-          puts "Book store: #{book.stores.map(&:id)}"
-          puts "Book soft deleted: #{book.deleted_at.present?} and Deletion comment: #{book.deletion_comment?}"
+          puts "Book: #{book.inspect}"
+          puts "Book store: #{book.stores.map(&:id)} before soft delete"
+          puts "Book store: #{book.stores.map(&:id)} after soft delete"
+          puts "Book soft deleted: #{book.deleted_at.present?} and Deletion comment: #{book.deletion_comment.present?}"
         end
 
         it 'permanently deletes the book in their store' do
@@ -280,12 +281,15 @@ end
           expect {
             delete :destroy_perm, params: { id: book.id }
             puts "Controller action completed"
-            book.reload
             puts "Book destroyed: #{book.destroyed?}"
             puts "After destroy_perm - Deleted books count: #{Book.deleted.count}"
           }.to change { Book.deleted.count }.by(-1)
           expect(response).to have_http_status(:ok)
-        end
+
+
+
+      end
+
 
         it 'returns forbidden status if manager tries to permanently delete a book not in their store' do
           other_store = create(:store)
