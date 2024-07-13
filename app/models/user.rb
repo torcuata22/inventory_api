@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :orders
   belongs_to :store, optional: true
 
+
   # Validations
   validates :email, presence: true, uniqueness: true
   validates :password, presence: true, confirmation: true

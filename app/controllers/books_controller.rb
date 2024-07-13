@@ -2,7 +2,8 @@ class BooksController < ApplicationController
   before_action :authenticate_user! # Ensure the user is authenticated for all actions
   before_action :set_book, only: [:show, :update, :soft_destroy] #removed :destroy_perm, :undelete frmo the list
   before_action :set_soft_deleted_book, only: [:destroy_perm, :undelete]
-  before_action :authorize_admin_or_manager, only: [:create, :update, :soft_destroy, :destroy_perm, :deleted_books, :undelete]
+  before_action :authorize_admin_or_manager, only: [:create, :update, :soft_destroy, :destroy_perm]
+  before_action :authorize_all_users, only: [:deleted_books, :undelete]
 
 
   def index
@@ -21,21 +22,19 @@ def create
 
   if current_user.manager?
     @book.stores << current_user.store
-    puts "FROM CONTROLLER --CURRENT USER STORE ID FROM CONTROLLER: #{current_user.store_id}"
-    puts "FROM CONTROLLER --BOOK STORES: #{@book.stores.pluck(:id)}"
   end
 
   if @book.save
-    puts "FROM CONTROLLER --BOOK CREATED: #{@book.inspect}"
     render json: @book, status: :created
   else
-    puts "FROM CONTROLLER --BOOK CREATION FAILED: #{@book.errors.full_messages}"
     render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
   end
+
 end
 
 #PUT /books/:id
 def update
+
   if current_user.manager?
     unless @book.stores.exists?(id: current_user.store_id)
       render json: { errors: 'You are not authorized to update this book' }, status: :forbidden
@@ -51,37 +50,29 @@ def update
   else
     render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
   end
+
 end
 
 
 def soft_destroy
-  puts "ENTERED SOFT DELETE"
+
   if current_user.admin? || (current_user.manager? && @book.stores.exists?(id: current_user.store_id))
+
     if @book.soft_delete
-      puts "FROM SOFT DELETE IN CONTROLLER: DELETED_AT FLAG SET TO: #{@book.deleted_at}"
       render json: { message: 'Book deleted successfully' }, status: :ok
     else
       render json: { errors: 'Unable to delete the book' }, status: :unprocessable_entity
     end
+
   else
     render json: { errors: 'You are not authorized to delete this book' }, status: :forbidden
   end
-  puts "FINISHED SOFT DELETE"
-end
 
+end
 
 # DELETE /books/:id/permanent
 def destroy_perm
   @book = Book.deleted.find_by(id: params[:id])
-
-  # if @book
-  #   puts "Found book with ID: #{@book.id}"
-  #   puts "Current user: #{current_user.email}, Role: #{current_user.role}, Store ID: #{current_user.store_id}"
-  #   puts "Book stores: #{@book.stores.pluck(:id)}"
-  #   puts "Soft deleted: #{@book.deleted_at.present?}"
-  # else
-  #   puts "No book found"
-  # end
 
   unless @book
     render json: { message: 'Book not found' }, status: :not_found
@@ -89,7 +80,7 @@ def destroy_perm
   end
 
   unless current_user.admin? || (current_user.manager? && @book.stores.exists?(id: current_user.store_id))
-    render json: { error: 'Unaithorized to delete this book' }, status: :unauthorized
+    render json: { error: 'Unauthorized to delete this book' }, status: :unauthorized
     return
     end
 
@@ -100,20 +91,22 @@ def destroy_perm
     else
       render json: { error: 'Failed to delete book', errors: @book.errors.full_messages }, status: :unprocessable_entity
     end
-end
-
+  end
 
 
   def deleted_books
-    @deleted_books = Book.not_deleted.where.not(deleted_at: nil)
-    render json: @deleted_books
+    puts "Current user role: #{current_user.role}"
+    @deleted_books = Book.deleted
+    if @deleted_books
+      render json: @deleted_books, status: :ok
+    end
   end
 
 
   def undelete
     book_id = params[:id].to_i
-    puts "BOOK ID: #{book_id}"
-    @book = Book.not_deleted.find(book_id)
+    @book = Book.deleted.find(book_id)
+
     unless @book
       render json: { errors: 'Book not found' }, status: :not_found
       return
@@ -155,6 +148,11 @@ end
     end
   end
 
+  def authorize_all_users
+    unless current_user.admin? || current_user.manager? || current_user.employee?
+      render json: { error: 'Unauthorized' }, status: :forbidden
+    end
+  end
 
   def book_params
     params.require(:book).permit(:title, :author, :isbn, :description, :publication_details, :deletion_comment, :deleted_at)

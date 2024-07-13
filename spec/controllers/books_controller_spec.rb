@@ -175,8 +175,7 @@ end
     end
   end
 
-  describe 'PUT #soft_destroy' do #NEED to change to soft_desrtoy
-  # let(:book) { create(:book) }
+  describe 'PUT #soft_destroy' do
 
   context 'when admin is signed in' do
     let(:admin) { create(:user, role: 'admin') }
@@ -241,7 +240,6 @@ end
       before do
         book.soft_delete
         book.reload
-        puts " SOFT DELETION TIME: #{book.deleted_at}"
       end
 
       context 'when admin is signed in' do
@@ -269,24 +267,13 @@ end
           store.books << book
           book.soft_delete
           book.reload
-          puts "Manager store: #{manager_user.store.id}"
-          puts "Book: #{book.inspect}"
-          puts "Book store: #{book.stores.map(&:id)} before soft delete"
-          puts "Book store: #{book.stores.map(&:id)} after soft delete"
-          puts "Book soft deleted: #{book.deleted_at.present?} and Deletion comment: #{book.deletion_comment.present?}"
         end
 
         it 'permanently deletes the book in their store' do
-          puts "Before destroy_perm - Deleted books count: #{Book.deleted.count}"
           expect {
             delete :destroy_perm, params: { id: book.id }
-            puts "Controller action completed"
-            puts "Book destroyed: #{book.destroyed?}"
-            puts "After destroy_perm - Deleted books count: #{Book.deleted.count}"
           }.to change { Book.deleted.count }.by(-1)
           expect(response).to have_http_status(:ok)
-
-
 
       end
 
@@ -315,4 +302,133 @@ end
       end
 
     end
+
+
+  describe 'GET #deleted_books' do
+  let!(:deleted_books) { create_list(:book, 3, deleted_at: Time.current) }  # Create some soft-deleted books
+
+  context 'when admin is signed in' do
+    let(:admin) { create(:user, role: 'admin') }
+
+    before do
+      sign_in admin
+      get :deleted_books
+    end
+
+    it 'returns a success response' do
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'returns all soft-deleted books' do
+      expect(response.parsed_body.size).to eq(deleted_books.size)
+    end
   end
+
+  context 'when manager is signed in' do
+    let(:manager_user) { create(:user, role: 'manager') }
+
+    before do
+      sign_in manager_user
+      get :deleted_books
+    end
+
+    it 'returns a success response' do
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'returns all soft-deleted books' do
+      response_books = JSON.parse(response.body)
+      expect(response_books.size).to eq(deleted_books.size)
+      deleted_books.each do |deleted_book|
+        expect(response_books.map { |b| b['id'] }).to include(deleted_book.id)
+      end
+    end
+  end
+
+  context 'when employee is signed in' do
+    let(:employee_user) { create(:user, role: 'employee') }
+
+    before do
+      sign_in employee_user
+      get :deleted_books
+    end
+
+    it 'returns a success response' do
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'returns all soft-deleted books' do
+      response_books = JSON.parse(response.body)
+      expect(response_books.size).to eq(deleted_books.size)
+      deleted_books.each do |deleted_book|
+        expect(response_books.map { |b| b['id'] }).to include(deleted_book.id)
+      end
+    end
+  end
+
+
+
+
+    describe 'POST #undelete' do
+      let!(:deleted_book) { create(:book, deleted_at: Time.current) }  # Create some soft-deleted books
+
+      context 'when admin is signed in' do
+        let(:admin) { create(:user, role: 'admin') }
+
+        before do
+          sign_in admin
+          end
+
+        it 'undeletes a soft-deleted book' do
+          expect { post :undelete, params: { id: deleted_book.id }
+        }.to change { Book.deleted.count }.by(-1)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body['message']).to eq('Book undeleted successfully')
+        end
+      end
+
+
+      context 'when manager is signed in' do
+        let(:store) { create(:store) }
+        let(:manager) { create(:user, role: 'manager') }
+        let(:deleted_book) { create(:book, deleted_at: Time.current) } # Associate the book with the store
+
+        before do
+          sign_in manager
+          store.books << deleted_book
+          deleted_book.reload
+        end
+
+        it 'undeletes a soft-deleted book' do
+          expect { post :undelete, params: { id: deleted_book.id }
+          }.to change { Book.deleted.count }.by(-1)
+
+          expect(response).to have_http_status(:ok)
+          expect(response.parsed_body['message']).to eq('Book undeleted successfully')
+        end
+    end
+
+    context 'when employee is signed in' do
+      let(:store) { create(:store) }
+      let(:manager) { create(:user, role: 'manager', stores: [store]) }
+      let!(:deleted_book) { create(:book, deleted_at: Time.current, stores: [store]) } # Associate the book with the store
+
+      before do
+        sign_in employee
+      end
+
+      it 'undeletes a soft-deleted book' do
+        expect { post :undelete, params: { id: deleted_book.id }
+      }.to change { Book.deleted.count }.by(-1)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body['message']).to eq('Book undeleted successfully')
+    end
+  end
+
+
+
+    end
+  end
+end
