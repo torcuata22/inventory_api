@@ -7,6 +7,7 @@ class Book < ApplicationRecord
 
   has_many :store_books
   has_and_belongs_to_many :stores, through: :store_books
+  # has_and_belongs_to_many :stores, through: :store_books
   has_many :shipment_items
   has_many :shipments, through: :shipment_items
 

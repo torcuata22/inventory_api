@@ -1,6 +1,8 @@
 class StoresController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_store, only: [:update, :destroy]
+  before_action :set_store, only: [:update, :destroy, :show, :inventory]
+  before_action :set_admin_access, only: [:create, :update, :destroy]
+  before_action :authorize_all_users, only: [:inventory, :search_by_title]
 
 
   def index
@@ -51,26 +53,34 @@ class StoresController < ApplicationController
     end
   end
 
+
   def destroy
-    @store.destroy
+    puts "Destroy action called"
+    if @store.destroy
+      render json: { message: 'Store deleted successfully' }, status: :ok
+    else
+      render json: { error: 'Failed to delete store' }, status: :unprocessable_entity
+    end
   end
 
   def show
-    render json: @store
+    render json: @store, status: :ok
   end
 
 
   def inventory
-    if params[:title]
-      # Search for books by title
-      inventory_items = Book.includes(:authors).where(title: params[:title], store_id: @store.id)
+    if params[:title].present?
+      puts "Title param present: #{params[:title]}"
+      inventory_items = Book.where(title: params[:title], store_id: @store.id)
     else
-      # Retrieve all inventory items for the store
-      inventory_items = @store.books.includes(:authors)
+      puts "Title param not present"
+      inventory_items = @store.books
     end
 
+    puts "Inventory items: #{inventory_items.inspect}"
     render json: inventory_items, each_serializer: BookSerializer
   end
+
 
 
   def sales
@@ -132,7 +142,26 @@ class StoresController < ApplicationController
 private
 
 def set_store
-  @store = Store.find(params[:id])
+  puts "Params ID: #{params[:id]}"
+  @store = Store.find_by(id: params[:id])
+  puts "Store found: #{@store.inspect}"
+  rescue ActiveRecord::RecordNotFound
+    puts "Store not found"
+    render json: { error: 'Store not found' }, status: :not_found
+end
+
+def set_admin_access
+  puts "set_admin_access called"
+  unless current_user.admin?
+    puts "Access forbidden for user: #{current_user.id}"
+    render json: { error: 'unauthorized' }, status: :forbidden
+  end
+end
+
+def authorize_all_users
+  unless current_user.admin? || current_user.manager? || current_user.employee?
+    render json: { error: 'Unauthorized' }, status: :forbidden
+  end
 end
 
 def store_params

@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :store do
     store_name { 'Test Store' }
     store_address { '231 Main St. Manchester NH' }
-    store_type { 1 } #integer
+    store_type { :mega } # Use symbolic name instead of integer
     manager { 'Loki Marquez' }
     created_at { Time.zone.now }
     updated_at { Time.zone.now }

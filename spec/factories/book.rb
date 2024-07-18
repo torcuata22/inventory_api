@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :book do
+    # sequence(:title) { |n| "Book #{n}" }
     title { 'The Title' }
     author { 'John Doe' }
     isbn { '123456789' }

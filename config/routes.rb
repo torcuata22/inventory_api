@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       put 'update'
     end
     member do
+      get 'inventory'
       post 'sales'
     end
   end
