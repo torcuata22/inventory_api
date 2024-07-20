@@ -2,7 +2,7 @@ class StoresController < ApplicationController
   before_action :authenticate_user!
   before_action :set_store, only: [:update, :destroy, :show, :inventory]
   before_action :set_admin_access, only: [:create, :update, :destroy]
-  before_action :authorize_all_users, only: [:inventory, :search_by_title]
+  before_action :authorize_all_users, only: [:inventory, :search_by_title, :sales]
 
 
   def index

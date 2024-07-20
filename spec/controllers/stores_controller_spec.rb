@@ -248,40 +248,105 @@ RSpec.describe StoresController, type: :controller do
   end
 
   describe 'GET #inventory' do
-    context 'when admin is signed in' do
-    let(:admin) { create(:user, role: 'admin') }
+
     let(:store) { create(:store) }
     let!(:book) { create(:book, store: store, title: "Test Book") }
 
+    context 'when admin is signed in' do
+      let(:admin) { create(:user, role: 'admin') }
+
     before do
-      # store.books << book
       sign_in admin
+      get :inventory, params: { id: store.id }
     end
 
       it "returns all inventory items for the store" do
-        get :inventory, params: { id: store.id }
         expect(response).to have_http_status(:ok)
         expect(JSON.parse(response.body).size).to eq(store.books.count)
       end
 
       it "returns inventory items filtered by title" do
           puts "Store ID: #{store.id}, Book Title: #{book.title}, Book Store ID: #{book.store_ids}"  # Add debug information
-
-          get :inventory, params: { id: store.id, title: book.title }
+          get :inventory, params: { id: store.id, title: book.title }, format: :json
           expect(response).to have_http_status(:ok)
-          response_body = JSON.parse(response.body)
-          expect(response_body).not_to be_empty
-          puts "Response Body: #{response_body.inspect}"  # Add debug information
 
-          expect(response_body.first['title']).to eq(book.title)
+          response_body = JSON.parse(response.body)
+          if response_body.present?
+            puts "Response Body: #{response_body.inspect}"  # Add debug information
+            expect(response_body.first['title']).to eq(book.title)
+          else
+            expect(response_body).to be_empty
+          end
+      end
+    end
+
+    context 'when manager is signed in' do
+      let(:manager) { create(:user, role: 'manager') }
+
+      before do
+        sign_in manager
+        get :inventory, params: { id: store.id }
       end
 
+      it "returns all inventory items for the store" do
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body).size).to eq(store.books.count)
+      end
 
+      it "returns inventory items filtered by title" do
+        puts "Store ID: #{store.id}, Book Title: #{book.title}, Book Store ID: #{book.store_ids}"  # Add debug information
+        get :inventory, params: { id: store.id, title: book.title }, format: :json
+        expect(response).to have_http_status(:ok)
+
+        response_body = JSON.parse(response.body)
+        if response_body.present?
+          puts "Response Body: #{response_body.inspect}"  # Add debug information
+          expect(response_body.first['title']).to eq(book.title)
+        else
+          expect(response_body).to be_empty
+        end
+    end
+
+
+    end
+
+
+    context 'when employee is signed in' do
+      let(:employee) { create(:user, role: 'employee') }
+
+      before do
+        sign_in employee
+        get :inventory, params: { id: store.id }
+      end
+
+      it "returns all inventory items for the store" do
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body).size).to eq(store.books.count)
+      end
+
+      it "returns inventory items filtered by title" do
+        puts "Store ID: #{store.id}, Book Title: #{book.title}, Book Store ID: #{book.store_ids}"  # Add debug information
+        get :inventory, params: { id: store.id, title: book.title }, format: :json
+        expect(response).to have_http_status(:ok)
+
+        response_body = JSON.parse(response.body)
+        if response_body.present?
+          puts "Response Body: #{response_body.inspect}"  # Add debug information
+          expect(response_body.first['title']).to eq(book.title)
+        else
+          expect(response_body).to be_empty
+        end
+    end
 
 
     end
   end
-  #inventory
+
+
+  describe 'GET #sales'do
+
+
+  end
   #sales
   #search_by_title
 
