@@ -52,7 +52,7 @@ RSpec.describe Store, type: :model do
 
     it "has many and belongs to many books" do
       association = Store.reflect_on_association(:books)
-      expect(association.macro).to eq :has_and_belongs_to_many
+      expect(association.macro).to eq :has_many
     end
 
     it "has many  store_books" do
@@ -62,10 +62,27 @@ RSpec.describe Store, type: :model do
   end
 
   describe 'dependent: :destroy' do
+    # before do
+    #   # Ensure there are no existing `StoreBook` records
+    #   StoreBook.destroy_all
+    # end
+    # let(:store) { create(store) }
+
     it "destroys associated store_books when store is destroyed" do
-      store = create(:store)
-      create(:store_book, store: store)
+
+      puts "StoreBook count before creation: #{StoreBook.count}"
+      initial_count = StoreBook.count
+      store = create(:store, books_count: 1)
+      # create_list(:store_book,2, store: store)
+      # create(:store_book, store: store)
+      # create(:store_book, store: store)
+
+      expect(StoreBook.count).to eq(initial_count + 1)
+
+      puts "COUNT AFTER CREATION: #{StoreBook.count}"
       expect { store.destroy }.to change { StoreBook.count }.by(-1)
+      puts "COUNT AFTER DESTROY: #{StoreBook.count}"
+
     end
   end
 

@@ -2,6 +2,8 @@ class Store < ApplicationRecord
   enum store_type: { community: 0, mega: 1, warehouse: 2 }
   has_many :store_books, dependent: :destroy  # Define association with store_books
   has_many :books, through: :store_books
+
+  # before_destroy :update_books_count
   # has_and_belongs_to_many :books, through: :store_books
 
 
@@ -13,26 +15,34 @@ class Store < ApplicationRecord
 
   after_create :update_books_count
   after_destroy :update_books_count
+  # before_destroy :update_books_count
 
   def update_books_count
     return if destroyed?
     count = store_books.exists? ? store_books.count : 0
     update_column(:books_count, count)
+
   end
 
   def has_sufficient_inventory?(book, quantity)
     store_book = store_books.find_by(book: book)
     return false unless store_book
-
     store_book.quantity >= quantity
   end
 
+
   def sell_book(book, quantity)
     store_book = store_books.find_by(book: book)
-    return unless store_book
-
-    store_book.update(quantity: store_book.quantity - quantity)
+    if store_book
+      Rails.logger.debug "Before update: #{store_book.quantity}"
+      new_quantity = store_book.quantity - quantity
+      store_book.update!(quantity: new_quantity)
+      Rails.logger.debug "After update: #{store_book.reload.quantity}"
+    else
+      Rails.logger.debug "Book not found in store"
+    end
   end
+
 
   private
 

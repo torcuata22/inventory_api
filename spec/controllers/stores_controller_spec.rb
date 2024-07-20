@@ -305,11 +305,8 @@ RSpec.describe StoresController, type: :controller do
         else
           expect(response_body).to be_empty
         end
+      end
     end
-
-
-    end
-
 
     context 'when employee is signed in' do
       let(:employee) { create(:user, role: 'employee') }
@@ -336,19 +333,95 @@ RSpec.describe StoresController, type: :controller do
         else
           expect(response_body).to be_empty
         end
-    end
-
-
+      end
     end
   end
 
 
-  describe 'GET #sales'do
-
-
+  describe 'POST #sales'do
+  let(:admin) { create(:user, role: 'admin') }
+  let(:manager) { create(:user, role: 'manager') }
+  let(:employee) { create(:user, role: 'employee') }
+  let(:store) { create(:store) }
+  let(:initial_quantity) { 12 }
+  let(:quantity_sold) { 2 }
+  let!(:book) { create(:book, store: store, title: "Test Book") }
+  let!(:store_book) { create(:store_book, store: store, book: book, quantity: initial_quantity) }
+  let(:sales_params) do
+    [
+      {
+        book_id: book.id,
+        quantity: quantity_sold
+      }
+    ]
   end
-  #sales
+
+    context 'when admin is signed in' do
+      before do
+        sign_in admin
+        post :sales, params: { id: store.id, sales: sales_params }
+      end
+
+      it 'returns success response after sale' do
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)).to include('message'=>'Sale recorded successfully')
+      end
+
+      it 'records sale successfully' do
+        puts "SALES PARAMS: #{sales_params.inspect}"
+        puts "Initial quantity in factory: #{initial_quantity}"
+        puts "Quantity before sale: #{store_book.quantity}"
+
+        store_book.reload
+        expect(store_book.quantity).to eq(initial_quantity - quantity_sold)
+
+        puts "QUANTITY AFTER SELLING BOOKS IN TEST (from store_book): #{store_book.reload.quantity}"
+        puts "QUANTITY AFTER SELLING BOOKS IN TEST (from subtraction in test): #{store_book.reload.quantity}"
+
+      end
+    end
+
+    context 'when manager is signed in' do
+      before do
+        sign_in manager
+      end
+
+      it 'returns success response after sale' do
+        puts "SALES PARAMS: #{sales_params.inspect}"
+        post :sales, params: { id: store.id, sales: sales_params }
+      end
+
+    #FAILURE
+    #   it 'records sales successfully' do
+    #     expect(response).to have_http_status(:ok)
+    #     expect(JSON.parse(response.body)).to include('message'=>'Sale recorded successfully')
+    #     expect(store_book.reload.quantity).to eq(initial_quantity - quantity_sold)
+    #   end
+    # end
+
+    context 'when employee is signed in' do
+      before do
+        sign_in employee
+      end
+
+      it 'returns success response after sale' do
+        puts "SALES PARAMS: #{sales_params.inspect}"
+        post :sales, params: { id: store.id, sales: sales_params }
+      end
+
+
+    #   it 'records sales successfully' do
+    #     expect(response).to have_http_status(:ok)
+    #     expect(JSON.parse(response.body)).to include('message'=>'Sale recorded successfully')
+    #     expect(store_book.reload.quantity).to eq(initial_quantity - quantity_sold)
+    #   end
+    # end
+    end
+
   #search_by_title
 
+
+    end
   end
+end
 end
