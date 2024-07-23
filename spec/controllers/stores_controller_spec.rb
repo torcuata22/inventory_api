@@ -384,38 +384,49 @@ RSpec.describe StoresController, type: :controller do
     context 'when manager is signed in' do
       before do
         sign_in manager
-      end
-
-      it 'returns success response after sale' do
-        puts "SALES PARAMS: #{sales_params.inspect}"
         post :sales, params: { id: store.id, sales: sales_params }
       end
 
-    #FAILURE
-    #   it 'records sales successfully' do
-    #     expect(response).to have_http_status(:ok)
-    #     expect(JSON.parse(response.body)).to include('message'=>'Sale recorded successfully')
-    #     expect(store_book.reload.quantity).to eq(initial_quantity - quantity_sold)
-    #   end
-    # end
+      it 'returns success response after sale' do
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)).to include('message' => 'Sale recorded successfully')
+      end
+
+      it 'updates the quantity of the book' do
+        post :sales, params: { id:store.id, sales: [{ book_id: book.id, quantity: 2 }] }
+
+        store_book.reload
+        expect(store_book.quantity).to eq(10)  # Ensure this matches the expected result
+
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response['updated_quantities'].first['book_id'].to_i).to eq(book.id)
+        expect(parsed_response['updated_quantities'].first['new_quantity']).to eq(10)
+      end
+    end
+
 
     context 'when employee is signed in' do
       before do
         sign_in employee
-      end
-
-      it 'returns success response after sale' do
-        puts "SALES PARAMS: #{sales_params.inspect}"
         post :sales, params: { id: store.id, sales: sales_params }
       end
 
+      it 'returns success response after sale' do
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)).to include('message' => 'Sale recorded successfully')
+      end
 
-    #   it 'records sales successfully' do
-    #     expect(response).to have_http_status(:ok)
-    #     expect(JSON.parse(response.body)).to include('message'=>'Sale recorded successfully')
-    #     expect(store_book.reload.quantity).to eq(initial_quantity - quantity_sold)
-    #   end
-    # end
+      it 'updates the quantity of the book' do
+        post :sales, params: { id:store.id, sales: [{ book_id: book.id, quantity: 2 }] }
+
+        store_book.reload
+        expect(store_book.quantity).to eq(10)  # Ensure this matches the expected result
+
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response['updated_quantities'].first['book_id'].to_i).to eq(book.id)
+        expect(parsed_response['updated_quantities'].first['new_quantity']).to eq(10)
+      end
+    end
     end
 
   #search_by_title
@@ -423,5 +434,3 @@ RSpec.describe StoresController, type: :controller do
 
     end
   end
-end
-end
