@@ -6,7 +6,7 @@ FactoryBot.define do
     manager { 'Loki Marquez' }
     created_at { Time.zone.now }
     updated_at { Time.zone.now }
-    books_count { 2 } #integer
+    books_count { 12 } #integer
 
     # After creating a store, create associated books
     after(:create) do |store, evaluator|

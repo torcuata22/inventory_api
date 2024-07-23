@@ -338,7 +338,7 @@ RSpec.describe StoresController, type: :controller do
   end
 
 
-  describe 'POST #sales'do
+  describe 'POST #sales' do
   let(:admin) { create(:user, role: 'admin') }
   let(:manager) { create(:user, role: 'manager') }
   let(:employee) { create(:user, role: 'employee') }
@@ -356,30 +356,30 @@ RSpec.describe StoresController, type: :controller do
     ]
   end
 
-    context 'when admin is signed in' do
-      before do
-        sign_in admin
-        post :sales, params: { id: store.id, sales: sales_params }
-      end
-
-      it 'returns success response after sale' do
-        expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)).to include('message'=>'Sale recorded successfully')
-      end
-
-      it 'records sale successfully' do
-        puts "SALES PARAMS: #{sales_params.inspect}"
-        puts "Initial quantity in factory: #{initial_quantity}"
-        puts "Quantity before sale: #{store_book.quantity}"
-
-        store_book.reload
-        expect(store_book.quantity).to eq(initial_quantity - quantity_sold)
-
-        puts "QUANTITY AFTER SELLING BOOKS IN TEST (from store_book): #{store_book.reload.quantity}"
-        puts "QUANTITY AFTER SELLING BOOKS IN TEST (from subtraction in test): #{store_book.reload.quantity}"
-
-      end
+  context 'when admin is signed in' do
+    before do
+      sign_in admin
+      post :sales, params: { id: store.id, sales: sales_params }
     end
+
+    it 'returns success response after sale' do
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)).to include('message' => 'Sale recorded successfully')
+    end
+
+    it 'updates the quantity of the book' do
+      post :sales, params: { id:store.id, sales: [{ book_id: book.id, quantity: 2 }] }
+
+      store_book.reload
+      expect(store_book.quantity).to eq(10)  # Ensure this matches the expected result
+
+      parsed_response = JSON.parse(response.body)
+      expect(parsed_response['updated_quantities'].first['book_id'].to_i).to eq(book.id)
+      expect(parsed_response['updated_quantities'].first['new_quantity']).to eq(10)
+    end
+  end
+
+
 
     context 'when manager is signed in' do
       before do

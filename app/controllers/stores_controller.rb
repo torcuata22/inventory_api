@@ -1,6 +1,6 @@
 class StoresController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_store, only: [:update, :destroy, :show, :inventory]
+  before_action :set_store, only: [:update, :destroy, :show, :inventory, :sales]
   before_action :set_admin_access, only: [:create, :update, :destroy]
   before_action :authorize_all_users, only: [:inventory, :search_by_title, :sales]
 
@@ -82,38 +82,55 @@ class StoresController < ApplicationController
   end
 
 
-
   def sales
-    Rails.logger.debug "Sales action called"
-    @store = Store.find(params[:id])
-    sales_params = params[:sales]
-
-    if sales_params.is_a?(Array)
-      sales_params.each do |sale|
-        book_id = sale[:book_id]
-        quantity_sold = sale[:quantity].to_i
-
-        if quantity_sold <= 0
-          render json: { error: "Quantity must be greater than zero" }, status: :unprocessable_entity
-          return
-        end
-
-        book = Book.find_by(id: book_id)
-
-        if book && @store.has_sufficient_inventory?(book, quantity_sold)
-          Rails.logger.debug "Selling book #{book_id} with quantity #{quantity_sold}"
-          @store.sell_book(book, quantity_sold)
-        else
-          render json: { error: "Book not found or insufficient inventory" }, status: :not_found
-          return
-        end
-      end
-
-      render json: { message: "Sale recorded successfully" }, status: :ok
-    else
-      render json: { error: "Invalid sales parameters" }, status: :unprocessable_entity
+    store = Store.find(params[:id])
+    updated_quantities = []
+    sales_params.each do |sale|
+      book_id = sale[:book_id]
+      quantity_sold = sale[:quantity]
+      new_quantity = store.sell_book(book_id, quantity_sold)
+      updated_quantities << { book_id: book_id, new_quantity: new_quantity }
     end
+    render json: { message: 'Sale recorded successfully', updated_quantities: updated_quantities }
   end
+  # def sales
+  #   Rails.logger.debug "Sales action called"
+  #   @store = Store.find(params[:id])
+  #   permitted_sales_params = sales_params
+
+  #   if permitted_sales_params.is_a?(Array)
+  #     updated_quantities = [] # Define the variable here
+
+  #     permitted_sales_params.each do |sale|
+  #       book_id = sale[:book_id]
+  #       quantity_sold = sale[:quantity].to_i
+
+  #       if quantity_sold <= 0
+  #         render json: { error: "Quantity must be greater than zero" }, status: :unprocessable_entity
+  #         return
+  #       end
+
+  #       book = Book.find_by(id: book_id)
+
+  #       if book && @store.has_sufficient_inventory?(book, quantity_sold)
+  #         Rails.logger.debug "Selling book #{book_id} with quantity #{quantity_sold}"
+  #         updated_quantity = @store.sell_book(book, quantity_sold)
+  #         Rails.logger.debug "Updated quantity for book #{book_id}: #{updated_quantity}"
+
+  #         # Collect the updated quantity
+  #         updated_quantities << { book_id: book_id.to_i, new_quantity: updated_quantity }
+  #       else
+  #         render json: { error: "Book not found or insufficient inventory" }, status: :not_found
+  #         return
+  #       end
+  #     end
+
+  #     render json: { message: "Sale recorded successfully", updated_quantities: updated_quantities }, status: :ok
+  #   else
+  #     render json: { error: "Invalid sales parameters" }, status: :unprocessable_entity
+  #   end
+  # end
+
 
 
 
@@ -174,6 +191,12 @@ end
 
 def store_params
   params.require(:store).permit(:store_name, :store_address, :store_type, :manager)
+end
+
+def sales_params
+  params.require(:sales).map do |p|
+    ActionController::Parameters.new(p.to_unsafe_h).permit(:book_id, :quantity)
+  end
 end
 
 end

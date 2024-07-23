@@ -30,18 +30,42 @@ class Store < ApplicationRecord
     store_book.quantity >= quantity
   end
 
+  def sell_book(book_id, quantity)
+    store_book = store_books.find_by(book_id: book_id)
+    return unless store_book
 
-  def sell_book(book, quantity)
-    store_book = store_books.find_by(book: book)
-    if store_book
-      Rails.logger.debug "Before update: #{store_book.quantity}"
-      new_quantity = store_book.quantity - quantity
-      store_book.update!(quantity: new_quantity)
-      Rails.logger.debug "After update: #{store_book.reload.quantity}"
-    else
-      Rails.logger.debug "Book not found in store"
-    end
+    quantity = quantity.to_i
+    store_book.quantity = store_book.quantity.to_i - quantity
+    store_book.save!
+    store_book.quantity
   end
+
+
+  # def sell_book(book, quantity_sold)
+  #   store_book = store_books.find_by(book: book)
+  #   if store_book
+  #     store_book.update(quantity: store_book.quantity - quantity_sold)
+  #     store_book.quantity
+  #   else
+  #     raise "Book not found in store"
+  #   end
+  # end
+
+
+  # def sell_book(book, quantity)
+  #   store_book = store_books.find_by(book: book)
+  #   puts "ENTERING SELL_BOOK"
+  #   if store_book
+  #     puts "FOUND STORE_BOOK"
+  #     puts "Before update: #{store_book.quantity}"
+  #     new_quantity = store_book.quantity - quantity
+  #     store_book.update!(quantity: new_quantity)
+  #     puts "After update: #{store_book.reload.quantity}"
+  #     new_quantity
+  #   else
+  #     puts "Book not found in store"
+  #   end
+  # end
 
 
   private
