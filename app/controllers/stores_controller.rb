@@ -93,46 +93,6 @@ class StoresController < ApplicationController
     end
     render json: { message: 'Sale recorded successfully', updated_quantities: updated_quantities }
   end
-  # def sales
-  #   Rails.logger.debug "Sales action called"
-  #   @store = Store.find(params[:id])
-  #   permitted_sales_params = sales_params
-
-  #   if permitted_sales_params.is_a?(Array)
-  #     updated_quantities = [] # Define the variable here
-
-  #     permitted_sales_params.each do |sale|
-  #       book_id = sale[:book_id]
-  #       quantity_sold = sale[:quantity].to_i
-
-  #       if quantity_sold <= 0
-  #         render json: { error: "Quantity must be greater than zero" }, status: :unprocessable_entity
-  #         return
-  #       end
-
-  #       book = Book.find_by(id: book_id)
-
-  #       if book && @store.has_sufficient_inventory?(book, quantity_sold)
-  #         Rails.logger.debug "Selling book #{book_id} with quantity #{quantity_sold}"
-  #         updated_quantity = @store.sell_book(book, quantity_sold)
-  #         Rails.logger.debug "Updated quantity for book #{book_id}: #{updated_quantity}"
-
-  #         # Collect the updated quantity
-  #         updated_quantities << { book_id: book_id.to_i, new_quantity: updated_quantity }
-  #       else
-  #         render json: { error: "Book not found or insufficient inventory" }, status: :not_found
-  #         return
-  #       end
-  #     end
-
-  #     render json: { message: "Sale recorded successfully", updated_quantities: updated_quantities }, status: :ok
-  #   else
-  #     render json: { error: "Invalid sales parameters" }, status: :unprocessable_entity
-  #   end
-  # end
-
-
-
 
   def search_by_title
     if params[:title].present?

@@ -1,5 +1,8 @@
 class StoreBooksController < ApplicationController
 
+  before_action :authenticate_user!
+  before_action :set_admin_access, only: [:index, :show, :create, :destroy]
+  before_action :set_store, only: [:index, :show, :create, :destroy]
   def index
     @store_books = StoreBook.all
     render json: @store_books
@@ -37,11 +40,23 @@ class StoreBooksController < ApplicationController
   private
 
   def store_book_params
-    params.require(:store_books).permit(:store_id, :book_id)
+    params.require(:store_book).permit(:store_id, :book_id)
   end
 
   def update_book_quantity(book)
     book.update_quantity
+  end
+
+  def set_store
+    @store = Store.find(params[:store_id])
+  end
+
+  def set_admin_access
+    puts "set_admin_access called"
+    unless current_user.admin?
+      puts "Access forbidden for user: #{current_user.id}"
+      render json: { error: 'unauthorized' }, status: :forbidden
+    end
   end
 
 end

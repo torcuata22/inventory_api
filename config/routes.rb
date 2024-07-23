@@ -30,8 +30,9 @@ Rails.application.routes.draw do
       get 'inventory'
       post 'sales'
     end
+    resources :store_books, only: [:index, :show, :create, :destroy]
   end
-  resources :store_books
+
   resources :shipments
   resources :shipment_items
   resources :orders do
