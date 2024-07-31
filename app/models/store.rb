@@ -18,11 +18,12 @@ class Store < ApplicationRecord
   after_destroy :update_books_count
   # before_destroy :update_books_count
 
-  def update_books_count
-    return if destroyed?
-    count = store_books.exists? ? store_books.count : 0
-    update_column(:books_count, count)
 
+
+  def update_books_count
+    count = store_books.count
+    puts "Books count from STORE model: #{count}"
+    update_column(:books_count, count)
   end
 
   def has_sufficient_inventory?(book, quantity)

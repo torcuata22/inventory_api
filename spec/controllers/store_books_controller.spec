@@ -77,7 +77,6 @@ RSpec.describe StoreBooksController, type: :controller do
         sign_in admin
       end
 
-       #FAILS
       it 'creates a new store book' do
         expect {
           post :create, params: { store_id: store.id, store_book: { book_id: book.id } }
@@ -85,13 +84,11 @@ RSpec.describe StoreBooksController, type: :controller do
       end
     end
 
-
-    #FAILS
     context 'when manager is signed in' do
       before do
         sign_in manager
       end
-
+      #FAILS
       it 'does not create a new store book, returns forbidden' do
         expect(response).to have_http_status(:forbidden)
       end

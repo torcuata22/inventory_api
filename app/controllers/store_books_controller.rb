@@ -2,7 +2,7 @@ class StoreBooksController < ApplicationController
 
   before_action :authenticate_user!
   before_action :set_admin_access, only: [:index, :show, :create, :destroy]
-  before_action :set_store, only: [:index, :show, :create, :destroy]
+  before_action :set_store, only: [:index, :show, :destroy]
   def index
     @store_books = StoreBook.all
     render json: @store_books
@@ -16,7 +16,9 @@ class StoreBooksController < ApplicationController
 
 
   def create
-    @store_book = StoreBook.new(store_book_params)
+    @store = Store.find(params[:store_id]) #filter based on store_id
+    @book = Book.find(params[:store_book][:book_id]) #filter based on book_id
+    @store_book = @store.store_books.build(book: @book) #build store_book with book_id, build method creates new record without saving to db
 
     if @store_book.save
       @store = Store.find(@store_book.store_id)
@@ -55,6 +57,7 @@ class StoreBooksController < ApplicationController
     puts "set_admin_access called"
     unless current_user.admin?
       puts "Access forbidden for user: #{current_user.id}"
+      puts "Rendering error response"
       render json: { error: 'unauthorized' }, status: :forbidden
     end
   end
