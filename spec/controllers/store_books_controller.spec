@@ -88,25 +88,66 @@ RSpec.describe StoreBooksController, type: :controller do
       before do
         sign_in manager
       end
-      #FAILS
+
       it 'does not create a new store book, returns forbidden' do
+        post :create, params: { store_id: store.id, store_book: { book_id: book.id } }
         expect(response).to have_http_status(:forbidden)
       end
     end
 
-     #FAILS
     context 'when employee is signed in' do
       before do
         sign_in employee
       end
 
       it 'does not create a new store book, returns forbidden' do
+        post :create, params: { store_id: store.id, store_book: { book_id: book.id } }
         expect(response).to have_http_status(:forbidden)
       end
     end
   end
 
-  #destroy
+  describe 'DELETE #destroy' do
+
+    context 'when admin is signed in' do
+      before do
+        sign_in admin
+      end
+
+        it 'destroys the store_book' do
+          expect {
+          delete :destroy, params: { store_id: store.id, id: store_book.id }
+        }.to change { StoreBook.count }.by(-1)
+        expect(response).to have_http_status(:no_content)
+        end
+      end
 
 
+    context 'when manager is signed in' do
+      before do
+        sign_in manager
+      end
+
+      it 'does not destroy the store_book' do
+        expect {
+          delete :destroy, params: { store_id: store.id, id: store_book.id }
+      }.not_to change{ StoreBook.count }
+      expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'when employee is signed in' do
+      before do
+        sign_in manager
+      end
+
+      it 'does not destroy the store_book' do
+        expect {
+          delete :destroy, params: { store_id: store.id, id: store_book.id }
+      }.not_to change{ StoreBook.count }
+      expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+  end
 end

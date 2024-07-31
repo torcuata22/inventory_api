@@ -16,6 +16,7 @@ class StoreBooksController < ApplicationController
 
 
   def create
+    puts "CURREN USER ROLE: #{current_user.role}"
     @store = Store.find(params[:store_id]) #filter based on store_id
     @book = Book.find(params[:store_book][:book_id]) #filter based on book_id
     @store_book = @store.store_books.build(book: @book) #build store_book with book_id, build method creates new record without saving to db
@@ -34,7 +35,7 @@ class StoreBooksController < ApplicationController
     @store_book = StoreBook.find(params[:id])
     @book = @store_book.book
     @store_book.destroy
-    update_book_quantity(@book) if @book.present?
+    # update_book_quantity(@book) if @book.present?
     head :no_content
   end
 
@@ -55,7 +56,9 @@ class StoreBooksController < ApplicationController
 
   def set_admin_access
     puts "set_admin_access called"
+    puts "Current user: #{current_user.inspect}"
     unless current_user.admin?
+      puts "Current user role: #{current_user.role}"
       puts "Access forbidden for user: #{current_user.id}"
       puts "Rendering error response"
       render json: { error: 'unauthorized' }, status: :forbidden
