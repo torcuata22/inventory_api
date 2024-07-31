@@ -6,7 +6,7 @@ RSpec.describe BooksController, type: :controller do
   let(:manager) { create(:manager_user, email: 'manager@test.com',  with_store: true) }
   let(:employee) { create(:employee_user, email: 'employee@test.com',  with_store: true) }
   let!(:books) { create_list(:book, 3) }
-  let(:book) { books.first }
+  let!(:book) { books.first }
 
   describe 'GET #index' do
     context 'when admin is signed in' do

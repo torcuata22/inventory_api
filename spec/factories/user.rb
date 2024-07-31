@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :user do
-    sequence(:email) { |n| "admin#{n}@testemail.com" }
+    sequence(:email) { |n| "theadmin#{n}@testemail.com" }
     password { 'password1' }
     password_confirmation { 'password1' }
     reset_password_token { SecureRandom.urlsafe_base64 }
@@ -13,7 +13,7 @@ FactoryBot.define do
   end
 
   factory :manager_user, class: 'User' do
-    sequence(:email) { |n| "manager#{n}@testemail.com" }
+    sequence(:email) { |n| "themanager#{n}@testemail.com" }
     password { 'password2' }
     password_confirmation { 'password2' }
     reset_password_token { SecureRandom.urlsafe_base64 }
@@ -34,7 +34,7 @@ FactoryBot.define do
   end
 
   factory :employee_user, class: 'User' do
-    sequence(:email) { |n| "employee#{n}@testemail.com" }
+    sequence(:email) { |n| "theemployee#{n}@testemail.com" }
     password { 'password3' }
     password_confirmation { 'password3' }
     reset_password_token { SecureRandom.urlsafe_base64 }
