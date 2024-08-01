@@ -1,4 +1,7 @@
 class ShipmentsController < ApplicationController
+  before_action :authenticate_user!
+  before_Action :authorize_all_users, only: [:index, :show, :create, :update, :destroy]
+  before_action :authorize_admin_manager, only: [:create, :update, :destroy]
   before_action :set_shipment, only: [:show, :update, :destroy]
 
   def index
@@ -42,4 +45,18 @@ class ShipmentsController < ApplicationController
   def set_shipment
     @shipment = Shipment.find(params[:id])
   end
+
+  def authorize_all_users
+    unless current_user.admin? || current_user.manager? || current_user.employee?
+      render json: { error: 'Unauthorized' }, status: :forbidden
+    end
+  end
+
+  def authorize_admin_manager
+    unless current_user.admin? || current_user.manager?
+      render json: { error: 'Unauthorized' }, status: :forbidden
+    end
+  end
+
+
 end
