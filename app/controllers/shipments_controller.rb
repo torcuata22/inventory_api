@@ -1,7 +1,8 @@
 class ShipmentsController < ApplicationController
   before_action :authenticate_user!
-  before_Action :authorize_all_users, only: [:index, :show, :create, :update, :destroy]
+  before_action :authorize_all_users, only: [:index, :show, :create, :update, :destroy]
   before_action :authorize_admin_manager, only: [:create, :update, :destroy]
+  before_action :set_store, only: [:create, :update, :destroy]
   before_action :set_shipment, only: [:show, :update, :destroy]
 
   def index
@@ -13,13 +14,26 @@ class ShipmentsController < ApplicationController
     render json: @shipment
   end
 
+  # def create
+  #   @store = Store.find(shipment_params[:store_id])
+  #   @shipment = @store.shipments.new(shipment_params)
+
+  #   if @shipment.save
+  #     render :show, status: :created
+  #   else
+  #     render :new, status: :unprocessable_entity
+  #   end
+  # end
+
+
+
   def create
-    @shipment = Shipment.new(shipment_params)
+    @shipment = @store.shipments.new(shipment_params)
 
     if @shipment.save
-      render json: @shipment, status: :created
+      render :show, status: :created
     else
-      render json: @shipment.errors, status: :unprocessable_entity
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -41,6 +55,9 @@ class ShipmentsController < ApplicationController
     params.require(:shipment).permit(:store_id, :arrival_date, shipment_items_attributes: [:quantity, :book_id])
   end
 
+  def set_store
+    @store = Store.find(params[:store_id])
+  end
 
   def set_shipment
     @shipment = Shipment.find(params[:id])

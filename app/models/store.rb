@@ -7,6 +7,7 @@ class Store < ApplicationRecord
 
   # before_destroy :update_books_count
 
+  has_many :shipments
 
   has_many :orders
 
