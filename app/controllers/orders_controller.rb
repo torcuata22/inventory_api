@@ -57,10 +57,7 @@ class OrdersController < ApplicationController
     store_id = params.dig(:order, :store_id) # Extract store_id from order parameters
     @store = Store.find(store_id) if store_id.present?
   end
-  # def set_store
-  #   puts "Parameters: #{params.inspect}"
-  #   @store = Store.find(params[:store_id])
-  # end
+
 def authorize_all_users
     unless current_user.admin? || current_user.manager? || current_user.employee?
       render json: { error: 'Unauthorized' }, status: :forbidden

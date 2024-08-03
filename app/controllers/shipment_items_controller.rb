@@ -1,5 +1,9 @@
 class ShipmentItemsController < ApplicationController
 
+  before_action :authenticate_user!
+  before_action :authorize_all_users, only: [:create]
+
+
   def create
     @shipment_item = ShipmentItem.new(shipment_item_params)
 
@@ -17,5 +21,10 @@ class ShipmentItemsController < ApplicationController
     params.require(:shipment).permit(:store_id, :arrival_date, shipment_items_attributes: [:book_id, :quantity])
   end
 
+  def authorize_all_users
+    unless current_user.admin? || current_user.manager? || current_user.employee?
+      render json: { error: 'Unauthorized' }, status: :forbidden
+    end
+  end
 
 end
