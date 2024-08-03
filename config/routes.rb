@@ -39,6 +39,7 @@ Rails.application.routes.draw do
   resources :shipment_items
   resources :orders do
     resources :order_items, only: [:create, :destroy]
+    get :show, on: :member
   end
 
 

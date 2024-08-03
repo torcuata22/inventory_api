@@ -49,7 +49,7 @@ class OrdersController < ApplicationController
   end
 
   def set_order
-    @order = Order.fid(params[:id])
+    @order = Order.find(params[:id])
   end
   def set_store
     @store = Store.find(params[:store_id])
