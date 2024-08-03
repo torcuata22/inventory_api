@@ -10,7 +10,5 @@ FactoryBot.define do
     after(:create) do |shipment|
       create_list(:shipment_item, 2, shipment: shipment)
     end
-
-
   end
 end

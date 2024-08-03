@@ -16,6 +16,9 @@ class ShipmentsController < ApplicationController
 
 
   def create
+    puts shipment_params
+    @shipment = Shipment.new(shipment_params)
+    @shipment.store_id = params[:store_id]
     if @shipment.save
       render :show, status: :created
     else
@@ -46,9 +49,22 @@ class ShipmentsController < ApplicationController
   # end
 
 
+  # def shipment_params
+  #   params.require(:shipment).permit(
+  #     :arrival_date,
+  #     shipment_items_attributes: [
+  #       :id,
+  #       :quantity,
+  #       :book_id,
+  #       :_destroy
+  #     ]
+  #     )
+  # end
+
   def shipment_params
-    params.require(:shipment).permit(:arrival_date, shipment_items_attributes: [:id, :quantity, :book_id, :_destroy])
+    params.require(:shipment).permit(:arrival_date, shipment_items_attributes: [:id, :quantity, :book_id])
   end
+
 
   def set_store
     @store = Store.find(params[:store_id])

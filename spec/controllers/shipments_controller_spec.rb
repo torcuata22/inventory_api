@@ -2,22 +2,28 @@
 require 'rails_helper'
 
 RSpec.describe ShipmentsController, type: :controller do
-
   let(:admin) { create(:user, email: 'myadmin@test.com', role: 'admin') }
-  let(:manager) { create(:manager_user, email: 'manager@test.com',  with_store: true) }
-  let(:employee) { create(:employee_user, email: 'employee@test.com',  with_store: true) }
+  let(:manager) { create(:manager_user, email: 'manager@test.com', with_store: true) }
+  let(:employee) { create(:employee_user, email: 'employee@test.com', with_store: true) }
   let(:store) { create(:store) }
-  let(:shipment_attributes) { attributes_for(:shipment).merge(store_id: store.id) }
+  let(:shipment_attributes) do
+    {
+      arrival_date: Date.today,
+      shipment_items_attributes: [
+        { quantity: 10, book_id: create(:book).id }
+      ],
+      store_id: store.id
+    }
+  end
 
   describe 'GET #index' do
-
     context 'when admin is signed in' do
       before do
         sign_in admin
         get :index
       end
 
-      it 'resturns a success response' do
+      it 'returns a success response' do
         expect(response).to be_successful
       end
     end
@@ -28,7 +34,7 @@ RSpec.describe ShipmentsController, type: :controller do
         get :index
       end
 
-      it 'resturns a success response' do
+      it 'returns a success response' do
         expect(response).to be_successful
       end
     end
@@ -39,15 +45,14 @@ RSpec.describe ShipmentsController, type: :controller do
         get :index
       end
 
-      it 'resturns a success response' do
+      it 'returns a success response' do
         expect(response).to be_successful
       end
     end
   end
-
 
   describe 'GET #show' do
-  let(:shipment) { create(:shipment) }
+    let(:shipment) { create(:shipment, store: store) }
 
     context 'when admin is signed in' do
       before do
@@ -55,7 +60,7 @@ RSpec.describe ShipmentsController, type: :controller do
         get :show, params: { id: shipment.id }
       end
 
-      it 'resturns a success response' do
+      it 'returns a success response' do
         expect(response).to be_successful
       end
     end
@@ -66,7 +71,7 @@ RSpec.describe ShipmentsController, type: :controller do
         get :show, params: { id: shipment.id }
       end
 
-      it 'resturns a success response' do
+      it 'returns a success response' do
         expect(response).to be_successful
       end
     end
@@ -77,69 +82,60 @@ RSpec.describe ShipmentsController, type: :controller do
         get :show, params: { id: shipment.id }
       end
 
-      it 'resturns a success response' do
+      it 'returns a success response' do
         expect(response).to be_successful
       end
     end
   end
 
-  #FAILURE
-  describe ShipmentsController, type: :controller do
-
-    let(:store) { create(:store) }
-    let(:shipment_attributes) do
-      {
-        arrival_date: Date.today,
-        shipment_items_attributes: [
-          { quantity: 10, book_id: create(:book).id }
-        ]
-      }
-    end
-
-    describe 'POST #create' do
-      context 'when admin is signed in' do
-        before do
-          sign_in admin
-        end
-
-        it 'creates a new shipment' do
-          expect {
-            post :create, params: { store_id: store.id, shipment: shipment_attributes }
-          }.to change(Shipment, :count).by(1)
-        end
+  describe 'POST #create' do
+    context 'when admin is signed in' do
+      before do
+        sign_in admin
       end
 
-      context 'when manager is signed in' do
-        before do
-          sign_in manager
-        end
+      it 'creates a new shipment' do
+        expect {
+          post :create, params: { store_id: store.id, shipment: shipment_attributes }
+        }.to change(Shipment, :count).by(1)
+      end
+    end
 
-        it 'creates a new shipment' do
-          expect {
-            post :create, params: { store_id: store.id, shipment: shipment_attributes }
-          }.to change(Shipment, :count).by(1)
-        end
+    context 'when manager is signed in' do
+      before do
+        sign_in manager
+      end
+
+      it 'creates a new shipment' do
+        expect {
+          post :create, params: { store_id: store.id, shipment: shipment_attributes }
+        }.to change(Shipment, :count).by(1)
       end
     end
 
     context 'when employee is signed in' do
-        before do
-          sign_in employee
-        end
+      before do
+        sign_in employee
+      end
 
-        it 'returns forbidden status' do
-          post :create, params: { store_id: store.id, shipment: shipment_attributes }
-          expect(response).to have_http_status(:forbidden)
-        end
+      it 'returns forbidden status' do
+        post :create, params: { store_id: store.id, shipment: shipment_attributes }
+        expect(response).to have_http_status(:forbidden)
+      end
     end
   end
 
   describe 'PUT #update' do
-  let(:store) { create(:store) }
-  let(:shipment) { create(:shipment, store: store) }
-  let(:book) { create(:book) }
-  let(:new_attributes) { { arrival_date: '2024-12-25', shipment_items_attributes: [{ id: shipment.shipment_items.first.id, quantity: 5, book_id: book.id }] } }
-
+    let(:shipment) { create(:shipment, store: store) }
+    let(:book) { create(:book) }
+    let(:new_attributes) do
+      {
+        arrival_date: '2024-12-25',
+        shipment_items_attributes: [
+          { id: shipment.shipment_items.first.id, quantity: 5, book_id: book.id }
+        ]
+      }
+    end
 
     context 'when admin is signed in' do
       before do
@@ -185,7 +181,6 @@ RSpec.describe ShipmentsController, type: :controller do
         put :update, params: { id: shipment.id, shipment: new_attributes }
         expect(JSON.parse(response.body)['arrival_date']).to eq('2024-12-25')
       end
-
     end
 
     context 'when employee is signed in' do
@@ -193,11 +188,10 @@ RSpec.describe ShipmentsController, type: :controller do
         sign_in employee
       end
 
-      it' returns forbidden status' do
+      it 'returns forbidden status' do
         put :update, params: { id: shipment.id, shipment: new_attributes }
         expect(response).to have_http_status(:forbidden)
       end
-
     end
   end
 
@@ -233,10 +227,10 @@ RSpec.describe ShipmentsController, type: :controller do
         sign_in employee
       end
 
-        it 'returns forbidden status' do
-          delete :destroy, params: { id: shipment.id }
-          expect(response).to have_http_status(:forbidden)
-        end
+      it 'returns forbidden status' do
+        delete :destroy, params: { id: shipment.id }
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end
+end
