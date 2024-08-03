@@ -8,6 +8,7 @@ RSpec.describe ShipmentsController, type: :controller do
   let(:employee) { create(:employee_user, email: 'employee@test.com',  with_store: true) }
   let(:store) { create(:store) }
   let(:shipment_attributes) { attributes_for(:shipment).merge(store_id: store.id) }
+
   describe 'GET #index' do
 
     context 'when admin is signed in' do

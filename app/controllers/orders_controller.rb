@@ -1,10 +1,12 @@
 class OrdersController < ApplicationController
-
+  before_action :authenticate_user!
+  before_action :authorize_all_users, only: [:index, :create, :show, :update, :destroy]
+  before_action :set_store, only: [:create]
   before_action :set_order, only: [:show, :update, :destroy]
 
   def index
     @orders = Order.all
-    rende json: @orders
+    render json: @orders
   end
 
   #GET /orders/:id
@@ -42,13 +44,19 @@ class OrdersController < ApplicationController
 
   private
 
-  def set_order
-    @order = Order.fid(params[:id])
-  end
-
   def order_params
     params.require(:order).permit(:name, :address, :total_price, :store_id, :user_id)
   end
 
-
+  def set_order
+    @order = Order.fid(params[:id])
+  end
+  def set_store
+    @store = Store.find(params[:store_id])
+  end
+def authorize_all_users
+    unless current_user.admin? || current_user.manager? || current_user.employee?
+      render json: { error: 'Unauthorized' }, status: :forbidden
+    end
+  end
 end
