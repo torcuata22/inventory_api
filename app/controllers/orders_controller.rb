@@ -1,7 +1,7 @@
 class OrdersController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_all_users, only: [:index, :create, :show, :update, :destroy]
-  before_action :set_store, only: [:create]
+  before_action :set_store, only: [:create, :update]
   before_action :set_order, only: [:show, :update, :destroy]
 
   def index
@@ -14,11 +14,13 @@ class OrdersController < ApplicationController
     render json: @order
   end
 
-  #POST /orders
   def create
-    @order = Order.new(order_params)
-    book_ids = params[:book_ids]
-    @order.books << Book.where(id: book_ids) if book_ids.present?  # Associate books with the order
+    @order = @store.orders.new(order_params)
+
+    if params[:book_ids].present?
+      @order.books << Book.where(id: params[:book_ids])
+    end
+
     if @order.save
       render json: @order, status: :created
     else
@@ -35,7 +37,6 @@ class OrdersController < ApplicationController
     end
   end
 
-
   #DELETE /orders/:id
   def destroy
     @order.destroy
@@ -51,9 +52,15 @@ class OrdersController < ApplicationController
   def set_order
     @order = Order.find(params[:id])
   end
+
   def set_store
-    @store = Store.find(params[:store_id])
+    store_id = params.dig(:order, :store_id) # Extract store_id from order parameters
+    @store = Store.find(store_id) if store_id.present?
   end
+  # def set_store
+  #   puts "Parameters: #{params.inspect}"
+  #   @store = Store.find(params[:store_id])
+  # end
 def authorize_all_users
     unless current_user.admin? || current_user.manager? || current_user.employee?
       render json: { error: 'Unauthorized' }, status: :forbidden
