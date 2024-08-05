@@ -31,12 +31,14 @@ Rails.application.routes.draw do
       post 'sales'
     end
     resources :store_books, only: [:index, :show, :create, :destroy]
-    # resources :shipments, only: [:index, :show, :create, :update, :destroy]
+
   end
 
 
-  resources :shipments
-  resources :shipment_items
+  resources :shipments do
+   resources :shipment_items, only: [:index, :show, :create, :destroy]
+  end
+
   resources :orders do
     resources :order_items, only: [:create, :destroy]
     get :show, on: :member

@@ -1,8 +1,21 @@
 class OrderItemsController < ApplicationController
+  before_action :authenticate_user!
+  before_action :authorize_admin, only: [:create]
 
+
+  def index
+    @order_items = OrderItems.all
+    render json: @order_items
+  end
+
+  def show
+    @store = Store.find(params[:store_id]) #filter based on store_id to find particular store
+    @order_item = @store.order_item
+    render json: @store_books
+  end
   def create
-    @order_item = OrderItem.new(order_item_params)
-
+    # @order_item = OrderItem.new(order_item_params)
+    @order_item = @order.order_items.new(order_items)
     if @order_item.save
       # Update the inventory for the associated store book
       update_inventory(@order_item.book, @order_item.quantity)
@@ -12,8 +25,20 @@ class OrderItemsController < ApplicationController
     end
   end
 
-    private
+  def destroy
+    @order_item.destroy
+    head :no_content
+  end
 
+  private
+
+    def set_order
+      @order = Order.find(params[:order_id])
+    end
+
+    def set_order_item
+      @order_item = @order.order_items.find(params[:id])
+    end
     def order_item_params
       params.require(:order_item).permit(:order_id, :book_id, :quantity)
     end
@@ -25,5 +50,11 @@ class OrderItemsController < ApplicationController
 
       # Update the quantity of the book in inventory
       store_book.update(quantity: store_book.quantity + quantity)
+    end
+
+    def authorize_admin
+      unless current_user.admin?
+        render json: { error: 'Unauthorized' }, status: :unauthorized
+      end
     end
   end

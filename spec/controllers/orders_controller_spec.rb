@@ -5,15 +5,7 @@ RSpec.describe OrdersController, type: :controller do
   let(:admin) { create(:user, email: 'admin@test.com', role: 'admin') }
   let(:manager) { create(:manager_user, email: 'themanager@test.com',  with_store: true) }
   let(:employee) { create(:employee_user, email: 'myemployee@test.com',  with_store: true) }
-  let(:store) { create(:store) }
-  let(:order_attributes) do
-    {
-      name: "Bilbo Baggins",
-      address: "The Grey Haven",
-      total_price: 100.0,
-      store_id: store.id,
-      user_id: admin.id
-    }
+  let(:order) { create(:order) }
   end
 
   describe 'GET #index' do
@@ -208,4 +200,3 @@ RSpec.describe OrdersController, type: :controller do
       end
     end
   end
-end
