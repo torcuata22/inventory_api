@@ -1,10 +1,10 @@
 class OrderItemsController < ApplicationController
   before_action :authenticate_user!
-  before_action :authorize_admin, only: [:create]
+  before_action :authorize_admin, only: [:index, :show, :create, :destroy]
 
 
   def index
-    @order_items = OrderItems.all
+    @order_items = OrderItem.all
     render json: @order_items
   end
 
@@ -54,7 +54,7 @@ class OrderItemsController < ApplicationController
 
     def authorize_admin
       unless current_user.admin?
-        render json: { error: 'Unauthorized' }, status: :unauthorized
+        render json: { error: 'Forbidden' }, status: :forbidden
       end
     end
   end

@@ -40,7 +40,7 @@ Rails.application.routes.draw do
   end
 
   resources :orders do
-    resources :order_items, only: [:create, :destroy]
+    resources :order_items, only: [:index, :show, :create, :destroy]
     get :show, on: :member
   end
 

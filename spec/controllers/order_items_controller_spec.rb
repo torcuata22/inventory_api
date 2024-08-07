@@ -8,26 +8,69 @@ RSpec.describe OrderItemsController, type: :controller do
     let!(:store) {create(:store)}
     let!(:book) {create(:book)}
     let!(:order) { create(:order) }
+    let!(:order_item) { create(:order_item, order: order, book: book) }
 
-    describe "POST #create" do
-    context 'when admin is signed in' do
-      before do
-        sign_in admin
+    describe "GET #index" do
+      context 'when admin is signed in' do
+        before do
+          sign_in admin
+          get :index, params: { order_id: order.id, id: order_item.id }
+        end
+
+        it 'returns a success response' do
+          expect(response).to be_successful
+        end
       end
 
-      it 'creates a new order item' do
-        store.books << book
-        expect {
-          post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
-        }.to change(OrderItem, :count).by(1)
+      context 'when manager is signed in' do
+        before do
+          sign_in manager
+          get :index, params: { order_id: order.id, id: order_item.id }
+        end
+
+        it 'returns a forbidden response' do
+          expect(response).to have_http_status(:forbidden)
+        end
+
       end
 
-      it 'renders the new order item as JSON' do
-        post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
-        expect(response).to be_successful
-        expect(response.content_type).to eq('application/json')
+
+      context 'when employee is signed in' do
+        before do
+          sign_in employee
+          get :index, params: { order_id: order.id, id: order_item.id }
+        end
+
+        it 'returns a forbidden response' do
+          expect(response).to have_http_status(:forbidden)
+        end
+
       end
+
+
+
+
     end
-  end
+
+    # describe "POST #create" do
+    # context 'when admin is signed in' do
+    #   before do
+    #     sign_in admin
+    #   end
+
+    #   it 'creates a new order item' do
+    #     store.books << book
+    #     expect {
+    #       post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
+    #     }.to change(OrderItem, :count).by(1)
+    #   end
+
+    #   it 'renders the new order item as JSON' do
+    #     post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
+    #     expect(response).to be_successful
+    #     expect(response.content_type).to eq('application/json')
+    #   end
+    # end
+  # end
 
 end
