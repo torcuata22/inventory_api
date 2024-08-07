@@ -31,13 +31,21 @@ class ShipmentItemsController < ApplicationController
 
   private
 
-  def shipment_params
-    # params.require(:shipment).permit(:store_id, :arrival_date, shipment_items_attributes: [:book_id, :quantity])
+  def shipment_item_params
     params.require(:shipment_item).permit(:book_id, :quantity)
   end
+  # def shipment_params
+  #   # params.require(:shipment).permit(:store_id, :arrival_date, shipment_items_attributes: [:book_id, :quantity])
+  #   params.require(:shipment_item).permit(:book_id, :quantity)
+  # end
 
   def set_shipment
-    @shipment_item = @shipment.shipment_items.find(params[:shipment_id])
+    # @shipment_item = @shipment.shipment_item.find(params[:shipment_id])
+    @shipment = Shipment.find(params[:shipment_id])
+  end
+
+  def set_shipment_item
+    @shipment_item = ShipmentItem.find(params[:id])
   end
 
   def authorize_admin
