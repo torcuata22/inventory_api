@@ -83,26 +83,55 @@ RSpec.describe OrderItemsController, type: :controller do
       end
     end
 
-    # describe "POST #create" do
-    # context 'when admin is signed in' do
-    #   before do
-    #     sign_in admin
-    #   end
+    describe "POST #create" do
+    context 'when admin is signed in' do
+      before do
+        sign_in admin
+      end
 
-    #   it 'creates a new order item' do
-    #     store.books << book
-    #     expect {
-    #       post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
-    #     }.to change(OrderItem, :count).by(1)
-    #   end
+      it 'creates a new order item' do
+        store.books << book
+        expect {
+          post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
+        }.to change(OrderItem, :count).by(1)
+      end
 
-    #   it 'renders the new order item as JSON' do
-    #     post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
-    #     expect(response).to be_successful
-    #     expect(response.content_type).to eq('application/json')
-    #   end
-    # end
-  # end
+      it 'renders the new order item as JSON' do
+        post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
+        expect(response).to be_successful
+        expect(response.content_type).to eq('application/json; charset=utf-8')
+      end
+    end
+
+
+    context 'when manager is signed in' do
+      before do
+        sign_in manager
+        post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
+        store.books << book
+      end
+
+      it 'returns forbidden response' do
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+
+    context 'when employee is signed in' do
+      before do
+        sign_in employee
+        post :create, params: { order_id: order.id, order_item: { book_id: book.id, quantity: 1} }
+        store.books << book
+      end
+
+      it 'returns forbidden response' do
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+
+
+  end
 
 
   describe "DELETE #destroy" do
