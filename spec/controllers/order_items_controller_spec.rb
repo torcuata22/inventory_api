@@ -105,4 +105,41 @@ RSpec.describe OrderItemsController, type: :controller do
   # end
 
 
+  describe "DELETE #destroy" do
+    context 'when admin is signed in' do
+      before do
+        sign_in admin
+      end
+
+      it 'deletes the order item' do
+        expect {
+          delete :destroy, params: { store_id: store.id, order_id: order.id, id: order_item.id}
+        }.to change(OrderItem, :count).by(-1)
+
+      end
+    end
+
+    context 'when manager is signed in' do
+      before do
+        sign_in manager
+        get :show, params: { store_id: store.id, order_id: order.id, id: order_item.id }
+      end
+
+      it 'returns a forbidden response' do
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+
+    context 'when employee is signed in' do
+      before do
+        sign_in employee
+        get :show, params: { store_id: store.id, order_id: order.id, id: order_item.id }
+      end
+
+      it 'returns a forbidden response' do
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
 end
