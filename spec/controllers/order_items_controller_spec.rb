@@ -33,8 +33,6 @@ RSpec.describe OrderItemsController, type: :controller do
         end
 
       end
-
-
       context 'when employee is signed in' do
         before do
           sign_in employee
@@ -44,12 +42,45 @@ RSpec.describe OrderItemsController, type: :controller do
         it 'returns a forbidden response' do
           expect(response).to have_http_status(:forbidden)
         end
+      end
+    end
 
+
+    describe "GET #show" do
+      context 'when admin is signed in' do
+        before do
+          sign_in admin
+          get :show, params: { store_id: store.id, order_id: order.id, id: order_item.id }
+        end
+
+        it 'returns a success response and a JSON response' do
+          expect(response).to be_successful
+          expect(response.content_type).to eq('application/json; charset=utf-8')
+        end
+      end
+
+      context 'when manager is signed in' do
+        before do
+          sign_in manager
+          get :show, params: { store_id: store.id, order_id: order.id, id: order_item.id }
+        end
+
+        it 'returns a forbidden response' do
+          expect(response).to have_http_status(:forbidden)
+        end
       end
 
 
+      context 'when employee is signed in' do
+        before do
+          sign_in employee
+          get :show, params: { store_id: store.id, order_id: order.id, id: order_item.id }
+        end
 
-
+        it 'returns a forbidden response' do
+          expect(response).to have_http_status(:forbidden)
+        end
+      end
     end
 
     # describe "POST #create" do
@@ -72,5 +103,6 @@ RSpec.describe OrderItemsController, type: :controller do
     #   end
     # end
   # end
+
 
 end
